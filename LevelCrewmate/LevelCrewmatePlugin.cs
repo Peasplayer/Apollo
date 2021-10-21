@@ -28,7 +28,7 @@ namespace LevelCrewmate
             try
             {
                 var stream = Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("Testmod.Assets.assets");
+                    .GetManifestResourceStream("LevelCrewmate.Assets.assets");
                 Bundle = AssetBundle.LoadFromMemory(stream.ReadFully());
 
                 Logger<LevelCrewmatePlugin>.Info("Loading main AssetBundle...");
