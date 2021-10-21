@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Version>1.0.0</Version>
+        <Description>Custom Maps made with Unity</Description>
+        <Authors>Peasplayer</Authors>
+
+        <GameVersion Condition="'$(GamePlatform)' == 'Steam'">2021.6.30s</GameVersion>
+        <GameVersion Condition="'$(GamePlatform)' == 'Itch'">2021.6.30i</GameVersion>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <Target Name="Copy" AfterTargets="Build">
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+    </Target>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Assets\*" />
+        
+        <PackageReference Include="Reactor" Version="1.0.0-rc.1" />
+        <PackageReference Include="Reactor.MSBuild" Version="0.1.5" PrivateAssets="all" />
+    </ItemGroup>
+</Project>
