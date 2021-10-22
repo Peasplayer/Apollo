@@ -37,6 +37,7 @@ namespace LevelCrewmate
                 foreach (var obj in Bundle.LoadAllAssets())
                 {
                     objects++;
+                    Logger<LevelCrewmatePlugin>.Info("Found object: " + obj.name);
                 }
 
                 Logger<LevelCrewmatePlugin>.Info(
@@ -48,6 +49,7 @@ namespace LevelCrewmate
             }
 
             CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("MuseumMap.prefab").DontUnload();
+            CustomMap.MapLogo = Bundle.LoadAsset<Sprite>("logo.png").DontUnload();
 
             Harmony.PatchAll();
         }

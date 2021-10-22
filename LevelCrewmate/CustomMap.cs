@@ -13,6 +13,7 @@ namespace LevelCrewmate
         
         public static GameObject Map;
         public static GameObject MapPrefab;
+        public static Sprite MapLogo;
         public static SurvCamera CamPrefab;
         public static Vent VentPrefab;
 
@@ -20,21 +21,39 @@ namespace LevelCrewmate
         {
             ship.InitialSpawnCenter = ship.MeetingSpawnCenter = Map.transform.FindChild("Spawn").transform.position;//new Vector2(12.7f, -3f);
             Map.transform.FindChild("Spawn").gameObject.Destroy();
+            Map.transform.SetZ(2);
+
+            var emergencyButtonPrefab = GameObject.Find("EmergencyButton");
+            if (emergencyButtonPrefab != null)
+            {
+                var emergencyButton = Object.Instantiate(ship.transform.FindChild("Office").FindChild("caftable").FindChild("EmergencyButton"), emergencyButtonPrefab.transform.parent);
+                ship.MeetingSpawnCenter = emergencyButtonPrefab.transform.position;
+                emergencyButtonPrefab.Destroy();
+            }
 
             var securityPanelPrefab = GameObject.Find("SecurityPanel");
-            var securityPanel = Object.Instantiate(ship.transform.FindChild("Electrical").FindChild("Surv_Panel"), securityPanelPrefab.transform.parent);
-            securityPanel.name = "SecurityPanel";
-            securityPanel.transform.position = securityPanelPrefab.transform.position + new Vector3(0f, -0.16f);
-            securityPanelPrefab.Destroy();
+            if (securityPanelPrefab != null)
+            {
+                var securityPanel = Object.Instantiate(ship.transform.FindChild("Electrical").FindChild("Surv_Panel"), securityPanelPrefab.transform.parent);
+                securityPanel.name = "SecurityPanel";
+                securityPanel.transform.position = securityPanelPrefab.transform.position + new Vector3(0f, -0.16f);
+                securityPanelPrefab.Destroy();
+            }
 
             var laptopPrefab = GameObject.Find("CustomizeLaptop");
-            var laptop = Object.Instantiate(ship.transform.FindChild("Office").FindChild("caftable").FindChild("TaskAddConsole"), laptopPrefab.transform.parent);
-            laptop.name = "CustomizeLaptop";
-            laptop.transform.position = laptopPrefab.transform.position;
-            laptopPrefab.Destroy();
+            if (laptopPrefab != null)
+            {
+                var laptop = Object.Instantiate(ship.transform.FindChild("Office").FindChild("caftable").FindChild("TaskAddConsole"), laptopPrefab.transform.parent);
+                laptop.name = "CustomizeLaptop";
+                laptop.transform.position = laptopPrefab.transform.position;
+                laptopPrefab.Destroy();
+            }
 
             foreach (var roomPrefab in Object.FindObjectsOfType<GameObject>().Where(obj => obj.name.StartsWith("[ROOM]")))
             {
+                roomPrefab.transform.SetZ(1);
+                roomPrefab.transform.FindChild("Ground").SetZ(0.999f);
+                
                 var room = roomPrefab.transform.FindChild("Room").gameObject.AddComponent<PlainShipRoom>();
                 room.roomArea = room.transform.FindChild("AreaCollider").GetComponent<PolygonCollider2D>();
                 if (roomPrefab.name.Contains(";"))

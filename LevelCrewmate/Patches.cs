@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Reactor;
 using Reactor.Extensions;
@@ -88,21 +89,6 @@ namespace LevelCrewmate
                 }
             }
         }
-        
-        [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.SpawnPlayer))]
-        public static class ShipStatusSpawnPlayerPatch
-        {
-            public static bool Prefix(ShipStatus __instance, [HarmonyArgument(0)] PlayerControl player)
-            {
-                if (CustomMap.CustomMapActive)
-                {
-                    player.transform.position = __instance.InitialSpawnCenter;
-                    return false;
-                }
-
-                return true;
-            }
-        }
 
         [HarmonyPatch(typeof(FreeplayPopover), nameof(FreeplayPopover.Show))]
         public static class FreeplayPopoverShowPatch
@@ -116,7 +102,9 @@ namespace LevelCrewmate
                     customMapButton =
                         Object.Instantiate(__instance.transform.FindChild("Content").FindChild("PlanetButton"),
                             __instance.transform.FindChild("Content"));
+                    customMapButton.name = "CustomMapButton";
                     customMapButton.transform.position += new Vector3(0f, 2.1f);
+                    customMapButton.GetComponent<SpriteRenderer>().sprite = CustomMap.MapLogo;
 
                     var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick.RemoveAllListeners();
@@ -153,26 +141,33 @@ namespace LevelCrewmate
         {
             private static Transform customMapButton;
 
-            public static void Prefix(FreeplayPopover __instance)
+            public static void Prefix(CreateGameOptions __instance)
             {
                 if (customMapButton == null)
                 {
-                    var mapSection = __instance.transform.FindChild("Content").FindChild("Map");
-                    mapSection.localScale = new Vector3(0.8f, 0.8f);
+                    var mapSection = __instance.Content.transform.FindChild("Map");
+                    
                     mapSection.position = new Vector3(-2.5f, -0.12f, -20f);
                     
-                    foreach (var _child in __instance.transform.GetComponentsInChildren<PassiveButton>())
+                    var mapButtons = __instance.Content.transform.FindChild("Map")
+                        .GetComponentsInChildren<PassiveButton>();
+                    for (int i = 0; i < mapButtons.Count; i++)
                     {
+                        var _child = mapButtons[i];
                         var child = _child.gameObject;
-                        child.transform.localScale /= 5f;
+                        child.transform.localScale /= 1.25f;
+                        child.transform.SetX(child.transform.position.x - 0.3f * (i + 1));
+                        child.GetComponentInChildren<SpriteRenderer>().enabled = true;
                         _child.OnClick.AddListener((UnityAction) listener1);
                     }
                     
                     customMapButton =
-                        Object.Instantiate(__instance.transform.FindChild("Content").FindChild("Map").FindChild("2"),
-                            __instance.transform.FindChild("Content").FindChild("Map"));
-                    customMapButton.transform.position += new Vector3(2.7f, 0f);
-                    customMapButton.name = "customMapButton";
+                        Object.Instantiate(__instance.Content.transform.FindChild("Map").FindChild("2"),
+                            __instance.Content.transform.FindChild("Map"));
+                    customMapButton.name = "CustomMapButton";
+                    customMapButton.transform.position += new Vector3(mapButtons.Last().transform.position.x + mapButtons[1].transform.position.x - mapButtons[0].transform.position.x - 0.26f, 0f);
+                    customMapButton.transform.FindChild("MapIcon2").GetComponent<SpriteRenderer>().sprite = CustomMap.MapLogo;
+                    customMapButton.GetComponent<SpriteRenderer>().enabled = false;
 
                     var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick.RemoveAllListeners();
@@ -181,11 +176,21 @@ namespace LevelCrewmate
                     void listener1()
                     {
                         CustomMap.UseCustomMap = false;
+                        customMapButton.GetComponent<SpriteRenderer>().enabled = false;
                     }
                     
                     void listener2()
                     {
                         CustomMap.UseCustomMap = true;
+                        customMapButton.GetComponent<SpriteRenderer>().enabled = true;
+                        mapButtons[2].GetComponent<SpriteRenderer>().enabled = false;
+                    }
+                    
+                    mapButtons[2].OnClick.AddListener((UnityAction) listener3);
+                    
+                    void listener3()
+                    {
+                        mapButtons[2].GetComponent<SpriteRenderer>().enabled = true;
                     }
                 }
             }
