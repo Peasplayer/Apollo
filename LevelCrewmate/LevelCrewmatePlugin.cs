@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.IL2CPP;
@@ -19,17 +20,12 @@ namespace LevelCrewmate
         public Harmony Harmony { get; } = new Harmony(Id);
 
         public static AssetBundle Bundle;
-        public static GameObject TestObject;
-
-        public static bool UseCustomMap;
 
         public override void Load()
         {
             try
             {
-                var stream = Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("LevelCrewmate.Assets.assets");
-                Bundle = AssetBundle.LoadFromMemory(stream.ReadFully());
+                Bundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\map");
 
                 Logger<LevelCrewmatePlugin>.Info("Loading main AssetBundle...");
 
@@ -48,7 +44,7 @@ namespace LevelCrewmate
                 Logger<LevelCrewmatePlugin>.Error("Failed to load main AssetBundle - " + e);
             }
 
-            CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("MuseumMap.prefab").DontUnload();
+            CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("Map.prefab").DontUnload();
             CustomMap.MapLogo = Bundle.LoadAsset<Sprite>("logo.png").DontUnload();
 
             Harmony.PatchAll();

@@ -9,7 +9,6 @@ namespace LevelCrewmate
     public class CustomMap
     {
         public static bool UseCustomMap;
-        public static bool CustomMapActive;
         
         public static GameObject Map;
         public static GameObject MapPrefab;
@@ -27,6 +26,7 @@ namespace LevelCrewmate
             if (emergencyButtonPrefab != null)
             {
                 var emergencyButton = Object.Instantiate(ship.transform.FindChild("Office").FindChild("caftable").FindChild("EmergencyButton"), emergencyButtonPrefab.transform.parent);
+                emergencyButton.position = emergencyButtonPrefab.transform.position;
                 ship.MeetingSpawnCenter = emergencyButtonPrefab.transform.position;
                 emergencyButtonPrefab.Destroy();
             }
