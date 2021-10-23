@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -235,7 +236,7 @@ namespace Apollo
                     
                     mapOption.OnValueChanged = new Action<OptionBehaviour>(_option =>
                     {
-                        Logger<LevelCrewmatePlugin>.Info("mapid: " + mapOption.GetInt());
+                        Logger<ApolloPlugin>.Info("mapid: " + mapOption.GetInt());
                     });
                 }
             }
