@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Reactor;
 using Reactor.Extensions;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -16,10 +17,10 @@ namespace LevelCrewmate
         public static SurvCamera CamPrefab;
         public static Vent VentPrefab;
 
-        public static void StartMap(ShipStatus ship)
+        public static void SetupMap(ShipStatus ship)
         {
-            ship.InitialSpawnCenter = ship.MeetingSpawnCenter = Map.transform.FindChild("Spawn").transform.position;//new Vector2(12.7f, -3f);
-            Map.transform.FindChild("Spawn").gameObject.Destroy();
+            ship.InitialSpawnCenter = ship.MeetingSpawnCenter = Map.transform.FindChild("[SPAWN]").transform.position;//new Vector2(12.7f, -3f);
+            Map.transform.FindChild("[SPAWN]").gameObject.Destroy();
             Map.transform.SetZ(2);
 
             var emergencyButtonPrefab = GameObject.Find("EmergencyButton");

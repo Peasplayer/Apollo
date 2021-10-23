@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -77,7 +78,7 @@ namespace LevelCrewmate
                 map.transform.position = __instance.transform.position;
 
                 CustomMap.Map = map;
-                CustomMap.StartMap(__instance);
+                CustomMap.SetupMap(__instance);
 
                 if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
                     CustomMap.UseCustomMap = false;
@@ -188,6 +189,28 @@ namespace LevelCrewmate
                     {
                         mapButtons[2].GetComponent<SpriteRenderer>().enabled = true;
                     }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
+        [HarmonyPrefix]
+        public static void AddMapToLocal(GameOptionsMenu __instance)
+        {
+            if (AmongUsClient.Instance.GameMode == GameModes.LocalGame)
+            {
+                var mapOption = Object.FindObjectOfType<KeyValueOption>();
+                
+                if (mapOption.Values.Count == 4)
+                {
+                    var item = mapOption.Values.ToArray()[2];
+                    item.key = "CUSTOMAP";
+                    mapOption.Values.Add(item);
+                    
+                    mapOption.OnValueChanged = new Action<OptionBehaviour>(_option =>
+                    {
+                        Logger<LevelCrewmatePlugin>.Info("mapid: " + mapOption.GetInt());
+                    });
                 }
             }
         }
