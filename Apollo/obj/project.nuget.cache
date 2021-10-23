@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xYTFxtCUX9FhAdiJAq9bwABNOe0nDpo7sh317G/8Sai/xnCdoxqWc+ewLsU528rkf4Mmyb1jrmZUBeOkmsnylA==",
+  "dgSpecHash": "1qhNJ9fxNSxPzF82tJWKD14ST44+2i/CrhMmvJsuwvGr59Z6qNJLqWJu6y8VjroNKmXyMlD3CeEUjvnpDgT+vg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\Apollo.csproj",
+  "projectFilePath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\angel\\.nuget\\packages\\reactor\\1.0.0-rc.1\\reactor.1.0.0-rc.1.nupkg.sha512",
     "C:\\Users\\angel\\.nuget\\packages\\reactor.msbuild\\0.1.5\\reactor.msbuild.0.1.5.nupkg.sha512"

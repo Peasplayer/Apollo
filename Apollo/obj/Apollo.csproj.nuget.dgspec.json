@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\Apollo.csproj": {}
+    "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj": {}
   },
   "projects": {
-    "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\Apollo.csproj": {
+    "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\Apollo.csproj",
+        "projectUniqueName": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj",
         "projectName": "Apollo",
-        "projectPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\Apollo.csproj",
+        "projectPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj",
         "packagesPath": "C:\\Users\\angel\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\LevelCrewmate\\obj\\",
+        "outputPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

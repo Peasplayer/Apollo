@@ -11,7 +11,7 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("Peasplayer")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Astral")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Custom Maps made with Unity")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]

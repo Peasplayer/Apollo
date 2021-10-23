@@ -1,6 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LevelCrewmate", "LevelCrewmate\LevelCrewmate.csproj", "{11FBC798-BAF5-4EE5-9511-BE6DB0592F99}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apollo", "Apollo\Apollo.csproj", "{B8A4B1C6-F056-4E19-8CB0-9614718F6E95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{11FBC798-BAF5-4EE5-9511-BE6DB0592F99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{11FBC798-BAF5-4EE5-9511-BE6DB0592F99}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{11FBC798-BAF5-4EE5-9511-BE6DB0592F99}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{11FBC798-BAF5-4EE5-9511-BE6DB0592F99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A4B1C6-F056-4E19-8CB0-9614718F6E95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A4B1C6-F056-4E19-8CB0-9614718F6E95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A4B1C6-F056-4E19-8CB0-9614718F6E95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A4B1C6-F056-4E19-8CB0-9614718F6E95}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA7AE7A6-BBBF-4F64-AD51-9F55892000E3}
 	EndGlobalSection
 EndGlobal
