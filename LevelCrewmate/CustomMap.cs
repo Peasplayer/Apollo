@@ -4,7 +4,7 @@ using Reactor.Extensions;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     public class CustomMap
     {

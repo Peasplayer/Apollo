@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     public class Patches
     {

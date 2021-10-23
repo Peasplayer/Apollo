@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     public static class Extensions
     {

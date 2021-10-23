@@ -7,14 +7,14 @@ using Reactor;
 using Reactor.Extensions;
 using UnityEngine;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     [BepInPlugin(Id)]
     [BepInProcess("Among Us.exe")]
     [BepInDependency(ReactorPlugin.Id)]
-    public class LevelCrewmatePlugin : BasePlugin
+    public class ApolloPlugin : BasePlugin
     {
-        public const string Id = "tk.peasplayer.amongus.levelcrewmate";
+        public const string Id = "gg.astral.apollo";
 
         public Harmony Harmony { get; } = new Harmony(Id);
 
@@ -31,21 +31,21 @@ namespace LevelCrewmate
                     .GetManifestResourceStream("LevelCrewmate.Assets.assets");
                 Bundle = AssetBundle.LoadFromMemory(stream.ReadFully());
 
-                Logger<LevelCrewmatePlugin>.Info("Loading main AssetBundle...");
+                Logger<ApolloPlugin>.Info("Loading main AssetBundle...");
 
                 var objects = 0;
                 foreach (var obj in Bundle.LoadAllAssets())
                 {
                     objects++;
-                    Logger<LevelCrewmatePlugin>.Info("Found object: " + obj.name);
+                    Logger<ApolloPlugin>.Info("Found object: " + obj.name);
                 }
 
-                Logger<LevelCrewmatePlugin>.Info(
+                Logger<ApolloPlugin>.Info(
                     $"Finished loading main AssetBundle. Found {objects} objects in AssetBundle");
             }
             catch (Exception e)
             {
-                Logger<LevelCrewmatePlugin>.Error("Failed to load main AssetBundle - " + e);
+                Logger<ApolloPlugin>.Error("Failed to load main AssetBundle - " + e);
             }
 
             CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("MuseumMap.prefab").DontUnload();

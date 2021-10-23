@@ -2,7 +2,7 @@
 using Reactor;
 using Reactor.Networking;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     public class CustomRpc
     {
@@ -13,9 +13,9 @@ namespace LevelCrewmate
         }
         
         [RegisterCustomRpc((uint) RpcCalls.HandShake)]
-        public class RpcSendHandshake : PlayerCustomRpc<LevelCrewmatePlugin, RpcSendHandshake.Data>
+        public class RpcSendHandshake : PlayerCustomRpc<ApolloPlugin, RpcSendHandshake.Data>
         {
-            public RpcSendHandshake(LevelCrewmatePlugin plugin, uint id) : base(plugin, id)
+            public RpcSendHandshake(ApolloPlugin plugin, uint id) : base(plugin, id)
             {
             }
 
@@ -54,9 +54,9 @@ namespace LevelCrewmate
         }
         
         [RegisterCustomRpc((uint) RpcCalls.UseCustomMap)]
-        public class RpcUseCustomMap : PlayerCustomRpc<LevelCrewmatePlugin, RpcUseCustomMap.Data>
+        public class RpcUseCustomMap : PlayerCustomRpc<ApolloPlugin, RpcUseCustomMap.Data>
         {
-            public RpcUseCustomMap(LevelCrewmatePlugin plugin, uint id) : base(plugin, id)
+            public RpcUseCustomMap(ApolloPlugin plugin, uint id) : base(plugin, id)
             {
             }
 
