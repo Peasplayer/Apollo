@@ -1,4 +1,7 @@
-# Apollo
+# Apollo - Custom Map API
+A less skiddy LevelImpostor
 
-Custom Maps made with Unity 
+Easily make custom maps with Unity prefabs!\
 Used in Astral
+
+**Currently in development**
