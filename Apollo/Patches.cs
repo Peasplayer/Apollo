@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Il2CppSystem.Dynamic.Utils;
 using Reactor;
 using Reactor.Extensions;
 using Reactor.Networking;
@@ -16,7 +17,7 @@ namespace Apollo
     [HarmonyPatch]
     public static class Patches
     {
-        public static Dictionary<SystemTypes, string> CustomRoomNames = new();
+        private static Dictionary<SystemTypes, string> CustomRoomNames = new();
 
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
         [HarmonyPostfix]
@@ -30,13 +31,6 @@ namespace Apollo
                 camPrefab.gameObject.SetActive(false);
                 CustomMap.CamPrefab = camPrefab;
 
-                foreach (var camera in __instance.GetComponentsInChildren<SurvCamera>())
-                {
-                    camera.Destroy();
-                }
-
-                __instance.AllCameras = new List<SurvCamera>().ToArray();
-
                 Vent ventPrefab = Object.Instantiate(__instance.GetComponentInChildren<Vent>());
                 ventPrefab.name = "ventPrefab";
                 ventPrefab.Left = null;
@@ -44,35 +38,21 @@ namespace Apollo
                 ventPrefab.Center = null;
                 ventPrefab.gameObject.SetActive(false);
                 CustomMap.VentPrefab = ventPrefab;
-
-                foreach (var vent in __instance.GetComponentsInChildren<Vent>())
-                {
-                    vent.Destroy();
-                }
-
-                __instance.AllVents = new List<Vent>().ToArray();
-
-                foreach (var console in __instance.GetComponentsInChildren<Console>())
-                {
-                    console.Destroy();
-                }
-
-                __instance.AllConsoles = new List<Console>().ToArray();
-
-                foreach (var room in __instance.GetComponentsInChildren<PlainShipRoom>())
-                {
-                    room.Destroy();
-                }
-
-                __instance.AllRooms = new List<PlainShipRoom>().ToArray();
+                
+                __instance.Clear();
             }
         }
 
-
-        // Custom room name text
+        public static void RegisterCustomRoomName(SystemTypes type, string name)
+        {
+            if (CustomRoomNames.ContainsKey(type))
+                CustomRoomNames[type] = name;
+            else
+                CustomRoomNames.Add(type, name);
+        }
        
         [HarmonyPatch(typeof(RoomTracker._CoSlideIn_d__11), nameof(RoomTracker._CoSlideIn_d__11.MoveNext))]
-        public static class RoomTrackerTextPatch
+        public static class RoomTrackerCustomRoomNames
         {
             public static void Prefix(RoomTracker._CoSlideIn_d__11 __instance)
             {
@@ -145,6 +125,9 @@ namespace Apollo
         public static void SendCustomHandshake(AmongUsClient __instance)
         {
             Coroutines.Start(CheckIfUseCustomMap());
+            
+            if (!GameOptionsData.MapNames.Contains(CustomMap.MapData.Name))
+                GameOptionsData.MapNames = GameOptionsData.MapNames.Add(CustomMap.MapData.Name);
         }
 
         public static IEnumerator CheckIfUseCustomMap()
@@ -193,7 +176,7 @@ namespace Apollo
                         CustomMap.MapLogo;
                     customMapButton.GetComponent<SpriteRenderer>().enabled = false;
 
-                    var button = customMapButton.GetComponent<ButtonBehavior>();
+                    var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick = new ButtonClickedEvent();
                     button.OnClick.AddListener((UnityAction)listener2);
 
@@ -219,6 +202,26 @@ namespace Apollo
                 }
             }
         }
+        
+        private static Action<KeyValueOption> HandleMapOption = new Action<KeyValueOption>(option =>
+        {
+            if (option.GetInt() == 5 && !CustomMap.UseCustomMap)
+            {
+                CustomMap.UseCustomMap = true;
+                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(
+                    new CustomRpc.RpcUseCustomMap.Data(true));
+                Logger<ApolloPlugin>.Info("true");
+                
+                Logger<ApolloPlugin>.Info(GameOptionsData.MapNames[option.GetInt()]);
+            }
+            else if (option.GetInt() != 5 && CustomMap.UseCustomMap)
+            {
+                CustomMap.UseCustomMap = false;
+                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(
+                    new CustomRpc.RpcUseCustomMap.Data(false));
+                Logger<ApolloPlugin>.Info("false");
+            }
+        });
 
         [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
         [HarmonyPrefix]
@@ -230,15 +233,52 @@ namespace Apollo
                 
                 if (mapOption.Values.Count == 4)
                 {
-                    var item = mapOption.Values.ToArray()[2];
-                    item.key = "CUSTOMAP";
+                    var item = mapOption.Values.ToArray().First();
+                    item.key = CustomMap.MapData.Name;
+                    item.value = 5;
                     mapOption.Values.Add(item);
-                    
-                    mapOption.OnValueChanged = new Action<OptionBehaviour>(_option =>
-                    {
-                        Logger<ApolloPlugin>.Info("mapid: " + mapOption.GetInt());
-                    });
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Increase))]
+        [HarmonyPostfix]
+        public static void KeyValueOptionIncreasePatch(KeyValueOption __instance)
+        {
+            if (__instance.OnValueChanged != null)
+            {
+                HandleMapOption.Invoke(__instance);
+            }
+        }
+        
+        [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Decrease))]
+        [HarmonyPostfix]
+        public static void KeyValueOptionDecreasePatch(KeyValueOption __instance)
+        {
+            if (__instance.OnValueChanged != null)
+            {
+                HandleMapOption.Invoke(__instance);
+            }
+        }
+        
+        [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGame))]
+        [HarmonyPrefix]
+        public static void AmongUsClientStartGamePatch(AmongUsClient __instance)
+        {
+            if (PlayerControl.GameOptions.MapId == 5)
+            {
+                PlayerControl.GameOptions.MapId = 2;
+                //GameOptionsData.MapNames.Remove(CustomMap.MapData.Name);
+                CustomMap.UseCustomMap = true;
+            }
+        }
+        
+        [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
+        public static class AmBannedPatch
+        {
+            public static void Postfix(out bool __result)
+            {
+                __result = false;
             }
         }
     }

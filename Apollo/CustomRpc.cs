@@ -49,7 +49,7 @@ namespace Apollo
                 if (data.Player == PlayerControl.LocalPlayer.PlayerId) 
                     return;
 
-                Rpc<RpcUseCustomMap>.Instance.Send(new RpcUseCustomMap.Data(data.Player, CustomMap.UseCustomMap));
+                Rpc<RpcUseCustomMap>.Instance.SendTo(data.Player, new RpcUseCustomMap.Data(CustomMap.UseCustomMap));
             }
         }
         
@@ -62,12 +62,10 @@ namespace Apollo
 
             public readonly struct Data
             {
-                public readonly byte Player;
                 public readonly bool UseCustomMap;
 
-                public Data(byte player, bool useCustomMap)
+                public Data(bool useCustomMap)
                 {
-                    Player = player;
                     UseCustomMap = useCustomMap;
                 }
             }
@@ -76,21 +74,17 @@ namespace Apollo
 
             public override void Write(MessageWriter writer, Data data)
             {
-                writer.Write(data.Player);
                 writer.Write(data.UseCustomMap);
             }
 
             public override Data Read(MessageReader reader)
             {
-                return new Data(reader.ReadByte(), reader.ReadBoolean());
+                return new Data(reader.ReadBoolean());
             }
 
             public override void Handle(PlayerControl innerNetObject, Data data)
             {
                 if (AmongUsClient.Instance.AmHost) 
-                    return;
-                
-                if (PlayerControl.LocalPlayer.PlayerId != data.Player) 
                     return;
 
                 CustomMap.UseCustomMap = data.UseCustomMap;
