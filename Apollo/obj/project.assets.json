@@ -1,0 +1,210 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETStandard,Version=v2.1": {
+      "Reactor/1.0.0-rc.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Reactor.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Reactor.dll": {}
+        }
+      },
+      "Reactor.MSBuild/0.1.5": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/AssemblyUnhollower.dll": {},
+          "lib/netstandard2.1/DepotDownloader.Library.dll": {},
+          "lib/netstandard2.1/Iced.dll": {},
+          "lib/netstandard2.1/Il2CppDumper.dll": {},
+          "lib/netstandard2.1/Microsoft.Win32.Registry.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Mdb.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Pdb.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Rocks.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.dll": {},
+          "lib/netstandard2.1/Newtonsoft.Json.dll": {},
+          "lib/netstandard2.1/Reactor.GameProvider.dll": {},
+          "lib/netstandard2.1/Reactor.MSBuild.dll": {},
+          "lib/netstandard2.1/SemVer.dll": {},
+          "lib/netstandard2.1/SteamKit2.dll": {},
+          "lib/netstandard2.1/UnhollowerBaseLib.dll": {},
+          "lib/netstandard2.1/UnhollowerRuntimeLib.dll": {},
+          "lib/netstandard2.1/protobuf-net.Core.dll": {},
+          "lib/netstandard2.1/protobuf-net.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/AssemblyUnhollower.dll": {},
+          "lib/netstandard2.1/DepotDownloader.Library.dll": {},
+          "lib/netstandard2.1/Iced.dll": {},
+          "lib/netstandard2.1/Il2CppDumper.dll": {},
+          "lib/netstandard2.1/Microsoft.Win32.Registry.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Mdb.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Pdb.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.Rocks.dll": {},
+          "lib/netstandard2.1/Mono.Cecil.dll": {},
+          "lib/netstandard2.1/Newtonsoft.Json.dll": {},
+          "lib/netstandard2.1/Reactor.GameProvider.dll": {},
+          "lib/netstandard2.1/Reactor.MSBuild.dll": {},
+          "lib/netstandard2.1/SemVer.dll": {},
+          "lib/netstandard2.1/SteamKit2.dll": {},
+          "lib/netstandard2.1/UnhollowerBaseLib.dll": {},
+          "lib/netstandard2.1/UnhollowerRuntimeLib.dll": {},
+          "lib/netstandard2.1/protobuf-net.Core.dll": {},
+          "lib/netstandard2.1/protobuf-net.dll": {}
+        },
+        "build": {
+          "build/Reactor.MSBuild.props": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Reactor/1.0.0-rc.1": {
+      "sha512": "n7D0jblyAgQ4BpL0AY3LU2cpcDa+QGQrkJnxJa2CsldVWaXxzG2Q04q5G4Q4mN5Aa87sivp3cplAGLOzHafdlQ==",
+      "type": "package",
+      "path": "reactor/1.0.0-rc.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/netstandard2.1/Reactor.dll",
+        "reactor.1.0.0-rc.1.nupkg.sha512",
+        "reactor.nuspec"
+      ]
+    },
+    "Reactor.MSBuild/0.1.5": {
+      "sha512": "SI7t3s3rGMPoINqnNhKJL1D1oEJ3jxcHUu3/yRvqpBhN/ACCSUjF9OIcMpub/3y78U4m7Hwz85pNBHVIWDInjA==",
+      "type": "package",
+      "path": "reactor.msbuild/0.1.5",
+      "files": [
+        ".nupkg.metadata",
+        "build/Reactor.MSBuild.props",
+        "lib/net472/AssemblyUnhollower.exe",
+        "lib/net472/DepotDownloader.Library.dll",
+        "lib/net472/Iced.dll",
+        "lib/net472/Il2CppDumper.dll",
+        "lib/net472/Microsoft.Bcl.HashCode.dll",
+        "lib/net472/Microsoft.Win32.Registry.dll",
+        "lib/net472/Mono.Cecil.Mdb.dll",
+        "lib/net472/Mono.Cecil.Pdb.dll",
+        "lib/net472/Mono.Cecil.Rocks.dll",
+        "lib/net472/Mono.Cecil.dll",
+        "lib/net472/Newtonsoft.Json.dll",
+        "lib/net472/Reactor.GameProvider.dll",
+        "lib/net472/Reactor.MSBuild.dll",
+        "lib/net472/SemVer.dll",
+        "lib/net472/SteamKit2.dll",
+        "lib/net472/UnhollowerBaseLib.dll",
+        "lib/net472/UnhollowerRuntimeLib.dll",
+        "lib/net472/protobuf-net.Core.dll",
+        "lib/net472/protobuf-net.dll",
+        "lib/netstandard2.1/AssemblyUnhollower.dll",
+        "lib/netstandard2.1/DepotDownloader.Library.dll",
+        "lib/netstandard2.1/Iced.dll",
+        "lib/netstandard2.1/Il2CppDumper.dll",
+        "lib/netstandard2.1/Microsoft.Win32.Registry.dll",
+        "lib/netstandard2.1/Mono.Cecil.Mdb.dll",
+        "lib/netstandard2.1/Mono.Cecil.Pdb.dll",
+        "lib/netstandard2.1/Mono.Cecil.Rocks.dll",
+        "lib/netstandard2.1/Mono.Cecil.dll",
+        "lib/netstandard2.1/Newtonsoft.Json.dll",
+        "lib/netstandard2.1/Reactor.GameProvider.dll",
+        "lib/netstandard2.1/Reactor.MSBuild.dll",
+        "lib/netstandard2.1/SemVer.dll",
+        "lib/netstandard2.1/SteamKit2.dll",
+        "lib/netstandard2.1/UnhollowerBaseLib.dll",
+        "lib/netstandard2.1/UnhollowerRuntimeLib.dll",
+        "lib/netstandard2.1/protobuf-net.Core.dll",
+        "lib/netstandard2.1/protobuf-net.dll",
+        "reactor.msbuild.0.1.5.nupkg.sha512",
+        "reactor.msbuild.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETStandard,Version=v2.1": [
+      "Reactor >= 1.0.0-rc.1",
+      "Reactor.MSBuild >= 0.1.5"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\angel\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
+    "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj",
+      "projectName": "Apollo",
+      "projectPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\Apollo.csproj",
+      "packagesPath": "C:\\Users\\angel\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Apollo\\Apollo\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+        "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\angel\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netstandard2.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Moonfuscator\\Moonfuscator\\bin\\Debug": {},
+        "C:\\Users\\angel\\Desktop\\TestProjects\\Csharp\\Reactor.MSBuild\\Reactor.MSBuild\\bin\\Debug": {},
+        "C:\\Users\\angel\\Downloads\\a": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netstandard2.1": {
+        "targetAlias": "netstandard2.1",
+        "dependencies": {
+          "Reactor": {
+            "target": "Package",
+            "version": "[1.0.0-rc.1, )"
+          },
+          "Reactor.MSBuild": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[0.1.5, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "NETStandard.Library": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.203\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

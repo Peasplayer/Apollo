@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -8,13 +7,16 @@ using Reactor.Extensions;
 using Reactor.Networking;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 
-namespace LevelCrewmate
+namespace Apollo
 {
     [HarmonyPatch]
     public static class Patches
     {
+        public static Dictionary<SystemTypes, string> CustomRoomNames = new();
+
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
         [HarmonyPostfix]
         public static void PrepareOldMap(ShipStatus __instance)
@@ -62,6 +64,30 @@ namespace LevelCrewmate
                 }
 
                 __instance.AllRooms = new List<PlainShipRoom>().ToArray();
+            }
+        }
+
+
+        // Custom room name text
+       
+        [HarmonyPatch(typeof(RoomTracker._CoSlideIn_d__11), nameof(RoomTracker._CoSlideIn_d__11.MoveNext))]
+        public static class RoomTrackerTextPatch
+        {
+            public static void Prefix(RoomTracker._CoSlideIn_d__11 __instance)
+            {
+                var customRoomName = "";
+                foreach(var room in CustomRoomNames)
+                {
+                    if(room.Key == __instance.newRoom)
+                    {
+                        customRoomName = room.Value;
+                    }
+                }
+
+                if (customRoomName != "")
+                {
+                    __instance.__4__this.text.text = customRoomName;
+                }
             }
         }
 
@@ -166,8 +192,8 @@ namespace LevelCrewmate
                         CustomMap.MapLogo;
                     customMapButton.GetComponent<SpriteRenderer>().enabled = false;
 
-                    var button = customMapButton.GetComponent<PassiveButton>();
-                    button.OnClick.RemoveAllListeners();
+                    var button = customMapButton.GetComponent<ButtonBehavior>();
+                    button.OnClick = new ButtonClickedEvent();
                     button.OnClick.AddListener((UnityAction)listener2);
 
                     mapButtons[2].OnClick.AddListener((UnityAction)listener3);
