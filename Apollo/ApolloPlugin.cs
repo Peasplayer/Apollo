@@ -28,7 +28,7 @@ namespace Apollo
             try
             {
                 var stream = Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("LevelCrewmate.Assets.assets");
+                    .GetManifestResourceStream("Apollo.Assets.assets");
                 Bundle = AssetBundle.LoadFromMemory(stream.ReadFully());
 
                 Logger<ApolloPlugin>.Info("Loading main AssetBundle...");

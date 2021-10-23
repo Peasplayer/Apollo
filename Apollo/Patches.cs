@@ -7,19 +7,22 @@ using Reactor.Extensions;
 using Reactor.Networking;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 
 namespace Apollo
 {
     public class Patches
     {
+        public static Dictionary<SystemTypes, string> CustomRoomNames = new();
+
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
         public static class ShipStatusAwakePatch
         {
             public static void Postfix(ShipStatus __instance)
             {
                 CustomMap.CustomMapActive = CustomMap.UseCustomMap;
-                
+
                 if (CustomMap.UseCustomMap)
                 {
                     SurvCamera camPrefab = Object.Instantiate(__instance.GetComponentInChildren<SurvCamera>());
@@ -27,7 +30,7 @@ namespace Apollo
                     camPrefab.NewName = StringNames.ExitButton;
                     camPrefab.gameObject.SetActive(false);
                     CustomMap.CamPrefab = camPrefab;
-                    
+
                     foreach (var camera in __instance.GetComponentsInChildren<SurvCamera>())
                     {
                         camera.Destroy();
@@ -42,31 +45,54 @@ namespace Apollo
                     ventPrefab.Center = null;
                     ventPrefab.gameObject.SetActive(false);
                     CustomMap.VentPrefab = ventPrefab;
-                    
+
                     foreach (var vent in __instance.GetComponentsInChildren<Vent>())
                     {
                         vent.Destroy();
                     }
-                    
+
                     __instance.AllVents = new List<Vent>().ToArray();
 
                     foreach (var console in __instance.GetComponentsInChildren<Console>())
                     {
                         console.Destroy();
                     }
-                    
+
                     __instance.AllConsoles = new List<Console>().ToArray();
 
                     foreach (var room in __instance.GetComponentsInChildren<PlainShipRoom>())
                     {
                         room.Destroy();
                     }
-                    
+
                     __instance.AllRooms = new List<PlainShipRoom>().ToArray();
                 }
             }
         }
-        
+
+        // Custom room name text
+       
+        [HarmonyPatch(typeof(RoomTracker._CoSlideIn_d__11), nameof(RoomTracker._CoSlideIn_d__11.MoveNext))]
+        public static class RoomTrackerTextPatch
+        {
+            public static void Prefix(RoomTracker._CoSlideIn_d__11 __instance)
+            {
+                var customRoomName = "";
+                foreach(var room in CustomRoomNames)
+                {
+                    if(room.Key == __instance.newRoom)
+                    {
+                        customRoomName = room.Value;
+                    }
+                }
+
+                if (customRoomName != "")
+                {
+                    __instance.__4__this.text.text = customRoomName;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Start))]
         public static class ShipStatusStartPatch
         {
@@ -79,12 +105,12 @@ namespace Apollo
                     var map = Object.Instantiate(CustomMap.MapPrefab);
                     map.SetActive(true);
                     map.transform.position = __instance.transform.position;
-                        //new Vector3(__instance.InitialSpawnCenter.x, __instance.InitialSpawnCenter.y);//, 1f //
+                    //new Vector3(__instance.InitialSpawnCenter.x, __instance.InitialSpawnCenter.y);//, 1f //
                     CustomMap.Map = map;
 
                     CustomMap.StartMap(__instance);
-                    
-                    if (AmongUsClient.Instance.GameMode == GameModes.FreePlay) 
+
+                    if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
                         CustomMap.UseCustomMap = false;
                 }
             }
@@ -108,7 +134,7 @@ namespace Apollo
 
                     var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick.RemoveAllListeners();
-                    button.OnClick.AddListener((UnityAction) listener);
+                    button.OnClick.AddListener((UnityAction)listener);
 
                     void listener()
                     {
@@ -117,7 +143,7 @@ namespace Apollo
                 }
             }
         }
-        
+
         [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameJoined))]
         public static class AmongUsClientOnGameJoinedPatch
         {
@@ -135,7 +161,7 @@ namespace Apollo
                 }
             }
         }
-        
+
         [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Show))]
         public static class CreateGameOptionsShowPatch
         {
@@ -146,9 +172,9 @@ namespace Apollo
                 if (customMapButton == null)
                 {
                     var mapSection = __instance.Content.transform.FindChild("Map");
-                    
+
                     mapSection.position = new Vector3(-2.5f, -0.12f, -20f);
-                    
+
                     var mapButtons = __instance.Content.transform.FindChild("Map")
                         .GetComponentsInChildren<PassiveButton>();
                     for (int i = 0; i < mapButtons.Count; i++)
@@ -158,9 +184,9 @@ namespace Apollo
                         child.transform.localScale /= 1.25f;
                         child.transform.SetX(child.transform.position.x - 0.3f * (i + 1));
                         child.GetComponentInChildren<SpriteRenderer>().enabled = true;
-                        _child.OnClick.AddListener((UnityAction) listener1);
+                        _child.OnClick.AddListener((UnityAction)listener1);
                     }
-                    
+
                     customMapButton =
                         Object.Instantiate(__instance.Content.transform.FindChild("Map").FindChild("2"),
                             __instance.Content.transform.FindChild("Map"));
@@ -169,25 +195,25 @@ namespace Apollo
                     customMapButton.transform.FindChild("MapIcon2").GetComponent<SpriteRenderer>().sprite = CustomMap.MapLogo;
                     customMapButton.GetComponent<SpriteRenderer>().enabled = false;
 
-                    var button = customMapButton.GetComponent<PassiveButton>();
-                    button.OnClick.RemoveAllListeners();
-                    button.OnClick.AddListener((UnityAction) listener2);
+                    var button = customMapButton.GetComponent<ButtonBehavior>();
+                    button.OnClick = new ButtonClickedEvent();
+                    button.OnClick.AddListener((UnityAction)listener2);
 
                     void listener1()
                     {
                         CustomMap.UseCustomMap = false;
                         customMapButton.GetComponent<SpriteRenderer>().enabled = false;
                     }
-                    
+
                     void listener2()
                     {
                         CustomMap.UseCustomMap = true;
                         customMapButton.GetComponent<SpriteRenderer>().enabled = true;
                         mapButtons[2].GetComponent<SpriteRenderer>().enabled = false;
                     }
-                    
-                    mapButtons[2].OnClick.AddListener((UnityAction) listener3);
-                    
+
+                    mapButtons[2].OnClick.AddListener((UnityAction)listener3);
+
                     void listener3()
                     {
                         mapButtons[2].GetComponent<SpriteRenderer>().enabled = true;
