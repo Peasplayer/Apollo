@@ -38,24 +38,24 @@ namespace Apollo
             shipStatus.AllVents = new List<Vent>().ToArray();
             shipStatus.DummyLocations = new List<Transform>().ToArray();
             shipStatus.SpecialTasks = new List<PlayerTask>().ToArray();
-            shipStatus.CommonTasks = new List<NormalPlayerTask>().ToArray();
-            shipStatus.LongTasks = new List<NormalPlayerTask>().ToArray();
-            shipStatus.NormalTasks = new List<NormalPlayerTask>().ToArray();
+            //shipStatus.CommonTasks = new List<NormalPlayerTask>().ToArray();
+            //shipStatus.LongTasks = new List<NormalPlayerTask>().ToArray();
+            //shipStatus.NormalTasks = new List<NormalPlayerTask>().ToArray();
             shipStatus.FastRooms = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, PlainShipRoom>();
             shipStatus.SystemNames = new List<StringNames>().ToArray();
-            shipStatus.Systems = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, ISystemType>();
-            shipStatus.Systems.Add(SystemTypes.Electrical, new SwitchSystem().Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Comms, new HudOverrideSystemType().Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Laboratory, new ReactorSystemType(60f, SystemTypes.Laboratory).Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Ventilation, new VentilationSystem().Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Doors, new DoorsSystemType().Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Sabotage, new SabotageSystemType(new IActivatable[] {
-                shipStatus.Systems[SystemTypes.Electrical].Cast<IActivatable>(),
-                shipStatus.Systems[SystemTypes.Comms].Cast<IActivatable>(),
-                shipStatus.Systems[SystemTypes.Laboratory].Cast<IActivatable>()
-            }).Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.Security, new SecurityCameraSystemType().Cast<ISystemType>());
-            shipStatus.Systems.Add(SystemTypes.MedBay, new MedScanSystem().Cast<ISystemType>());
+            //shipStatus.Systems = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, ISystemType>();
+            //shipStatus.Systems.Add(SystemTypes.Electrical, new SwitchSystem().Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Comms, new HudOverrideSystemType().Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Laboratory, new ReactorSystemType(60f, SystemTypes.Laboratory).Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Ventilation, new VentilationSystem().Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Doors, new DoorsSystemType().Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Sabotage, new SabotageSystemType(new IActivatable[] {
+                //shipStatus.Systems[SystemTypes.Electrical].Cast<IActivatable>(),
+                //shipStatus.Systems[SystemTypes.Comms].Cast<IActivatable>(),
+                //shipStatus.Systems[SystemTypes.Laboratory].Cast<IActivatable>()
+            //}).Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.Security, new SecurityCameraSystemType().Cast<ISystemType>());
+            //shipStatus.Systems.Add(SystemTypes.MedBay, new MedScanSystem().Cast<ISystemType>());
         }
         public static Vector3 SetX(this Transform transform, float x)
         {

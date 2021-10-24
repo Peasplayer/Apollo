@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Il2CppSystem.Dynamic.Utils;
 using Reactor;
-using Reactor.Extensions;
 using Reactor.Networking;
 using UnityEngine;
 using UnityEngine.Events;
@@ -128,6 +126,12 @@ namespace Apollo
             
             if (!GameOptionsData.MapNames.Contains(CustomMap.MapData.Name))
                 GameOptionsData.MapNames = GameOptionsData.MapNames.Add(CustomMap.MapData.Name);
+            
+            if (AmongUsClient.Instance.ShipPrefabs.ToArray().Count != 5)
+            {
+                var polus = AmongUsClient.Instance.ShipPrefabs.ToArray()[2];
+                AmongUsClient.Instance.ShipPrefabs.Insert(5, polus);
+            }
         }
 
         public static IEnumerator CheckIfUseCustomMap()
@@ -268,7 +272,6 @@ namespace Apollo
             if (PlayerControl.GameOptions.MapId == 5)
             {
                 PlayerControl.GameOptions.MapId = 2;
-                //GameOptionsData.MapNames.Remove(CustomMap.MapData.Name);
                 CustomMap.UseCustomMap = true;
             }
         }
