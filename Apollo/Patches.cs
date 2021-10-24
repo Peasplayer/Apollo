@@ -23,22 +23,26 @@ namespace Apollo
         {
             if (CustomMap.UseCustomMap)
             {
-                SurvCamera camPrefab = Object.Instantiate(__instance.GetComponentInChildren<SurvCamera>());
-                camPrefab.name = "camPrefab";
-                camPrefab.NewName = StringNames.ExitButton;
-                camPrefab.gameObject.SetActive(false);
-                CustomMap.CamPrefab = camPrefab;
-
-                Vent ventPrefab = Object.Instantiate(__instance.GetComponentInChildren<Vent>());
-                ventPrefab.name = "ventPrefab";
-                ventPrefab.Left = null;
-                ventPrefab.Right = null;
-                ventPrefab.Center = null;
-                ventPrefab.gameObject.SetActive(false);
-                CustomMap.VentPrefab = ventPrefab;
+                Coroutines.Start(CustomMap.CoLoadAllMaps());
                 
                 __instance.Clear();
             }
+        }
+        
+        public static int ShipStatusAwakeCount;
+        [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
+        [HarmonyPrefix]
+        public static bool CheckIfShouldExecuteShipStatusAwake(ShipStatus __instance)
+        {
+            if (ShipStatusAwakeCount == 1)
+                return false;
+            
+            if (CustomMap.UseCustomMap)
+            {
+                ShipStatusAwakeCount++;
+            }
+
+            return true;
         }
 
         public static void RegisterCustomRoomName(SystemTypes type, string name)
@@ -70,12 +74,17 @@ namespace Apollo
             }
         }
 
+        public static int ShipStatusStartCount;
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Start))]
         [HarmonyPrefix]
-        public static void InitializeMap(ShipStatus __instance)
+        public static bool InitializeMap(ShipStatus __instance)
         {
+            if (ShipStatusStartCount == 1)
+                return false;
+            
             if (CustomMap.UseCustomMap)
             {
+                ShipStatusStartCount++;
                 __instance.transform.gameObject.SetActive(false);
 
                 var map = Object.Instantiate(CustomMap.MapPrefab);
@@ -83,11 +92,13 @@ namespace Apollo
                 map.transform.position = __instance.transform.position;
 
                 CustomMap.Map = map;
-                CustomMap.SetupMap(__instance);
+                Coroutines.Start(CustomMap.CoSetupMap(__instance));
 
                 if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
                     CustomMap.UseCustomMap = false;
             }
+
+            return true;
         }
 
         [HarmonyPatch(typeof(FreeplayPopover), nameof(FreeplayPopover.Show))]
@@ -103,7 +114,7 @@ namespace Apollo
                         Object.Instantiate(__instance.transform.FindChild("Content").FindChild("PlanetButton"),
                             __instance.transform.FindChild("Content"));
                     customMapButton.name = "CustomMapButton";
-                    customMapButton.transform.position += new Vector3(0f, 2.1f);
+                    customMapButton.transform.position = new Vector3(3.29f, 0.06999993f, -10f);
                     customMapButton.GetComponent<SpriteRenderer>().sprite = CustomMap.MapLogo;
 
                     var button = customMapButton.GetComponent<PassiveButton>();
@@ -129,8 +140,8 @@ namespace Apollo
             
             if (AmongUsClient.Instance.ShipPrefabs.ToArray().Count != 5)
             {
-                var polus = AmongUsClient.Instance.ShipPrefabs.ToArray()[2];
-                AmongUsClient.Instance.ShipPrefabs.Insert(5, polus);
+                var map = AmongUsClient.Instance.ShipPrefabs.ToArray()[2];
+                AmongUsClient.Instance.ShipPrefabs.Insert(5, map);
             }
         }
 
@@ -139,8 +150,7 @@ namespace Apollo
             if (!AmongUsClient.Instance.AmHost)
             {
                 yield return new WaitForSeconds(1f);
-                Rpc<CustomRpc.RpcSendHandshake>.Instance.Send(
-                    new CustomRpc.RpcSendHandshake.Data(PlayerControl.LocalPlayer.PlayerId));
+                Rpc<CustomRpc.RpcSendHandshake>.Instance.Send(PlayerControl.LocalPlayer.PlayerId);
             }
         }
 
@@ -212,18 +222,12 @@ namespace Apollo
             if (option.GetInt() == 5 && !CustomMap.UseCustomMap)
             {
                 CustomMap.UseCustomMap = true;
-                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(
-                    new CustomRpc.RpcUseCustomMap.Data(true));
-                Logger<ApolloPlugin>.Info("true");
-                
-                Logger<ApolloPlugin>.Info(GameOptionsData.MapNames[option.GetInt()]);
+                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(true);
             }
             else if (option.GetInt() != 5 && CustomMap.UseCustomMap)
             {
                 CustomMap.UseCustomMap = false;
-                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(
-                    new CustomRpc.RpcUseCustomMap.Data(false));
-                Logger<ApolloPlugin>.Info("false");
+                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(false);
             }
         });
 

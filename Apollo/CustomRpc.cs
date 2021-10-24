@@ -13,81 +13,61 @@ namespace Apollo
         }
         
         [RegisterCustomRpc((uint) RpcCalls.HandShake)]
-        public class RpcSendHandshake : PlayerCustomRpc<ApolloPlugin, RpcSendHandshake.Data>
+        public class RpcSendHandshake : PlayerCustomRpc<ApolloPlugin, byte>
         {
             public RpcSendHandshake(ApolloPlugin plugin, uint id) : base(plugin, id)
             {
             }
 
-            public readonly struct Data
-            {
-                public readonly byte Player;
-
-                public Data(byte player)
-                {
-                    Player = player;
-                }
-            }
-
             public override RpcLocalHandling LocalHandling => RpcLocalHandling.After;
 
-            public override void Write(MessageWriter writer, Data data)
+            public override void Write(MessageWriter writer, byte data)
             {
-                writer.Write(data.Player);
+                writer.Write(data);
             }
 
-            public override Data Read(MessageReader reader)
+            public override byte Read(MessageReader reader)
             {
-                return new Data(reader.ReadByte());
+                return reader.ReadByte();
             }
 
-            public override void Handle(PlayerControl innerNetObject, Data data)
+            public override void Handle(PlayerControl innerNetObject, byte data)
             {
                 if (!AmongUsClient.Instance.AmHost) 
                     return;
                 
-                if (data.Player == PlayerControl.LocalPlayer.PlayerId) 
+                if (data == PlayerControl.LocalPlayer.PlayerId) 
                     return;
 
-                Rpc<RpcUseCustomMap>.Instance.SendTo(data.Player, new RpcUseCustomMap.Data(CustomMap.UseCustomMap));
+                Rpc<RpcUseCustomMap>.Instance.SendTo(data, CustomMap.UseCustomMap);
             }
         }
         
         [RegisterCustomRpc((uint) RpcCalls.UseCustomMap)]
-        public class RpcUseCustomMap : PlayerCustomRpc<ApolloPlugin, RpcUseCustomMap.Data>
+        public class RpcUseCustomMap : PlayerCustomRpc<ApolloPlugin, bool>
         {
             public RpcUseCustomMap(ApolloPlugin plugin, uint id) : base(plugin, id)
             {
             }
 
-            public readonly struct Data
-            {
-                public readonly bool UseCustomMap;
-
-                public Data(bool useCustomMap)
-                {
-                    UseCustomMap = useCustomMap;
-                }
-            }
-
             public override RpcLocalHandling LocalHandling => RpcLocalHandling.After;
 
-            public override void Write(MessageWriter writer, Data data)
+            public override void Write(MessageWriter writer, bool data)
             {
-                writer.Write(data.UseCustomMap);
+                writer.Write(data);
             }
 
-            public override Data Read(MessageReader reader)
+            public override bool Read(MessageReader reader)
             {
-                return new Data(reader.ReadBoolean());
+                return reader.ReadBoolean();
             }
-
-            public override void Handle(PlayerControl innerNetObject, Data data)
+            
+            public override void Handle(PlayerControl innerNetObject, bool data)
             {
                 if (AmongUsClient.Instance.AmHost) 
                     return;
 
-                CustomMap.UseCustomMap = data.UseCustomMap;
+                CustomMap.UseCustomMap = data;
             }
         }
     }

@@ -11,6 +11,6 @@
             Y = y;
         }
 
-        public UnityEngine.Vector2 ToVector2 => new (X, Y);
+        public static implicit operator UnityEngine.Vector3(Vector2 vec) => new (vec.X, vec.Y);
     }
 }

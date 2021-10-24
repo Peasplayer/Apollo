@@ -64,11 +64,7 @@ namespace Apollo
             {
                 if (Input.GetKeyDown(KeyCode.F6))
                 {
-                    //var jsonString = "{\"Name\": \"Museum\", \"Rooms\": [{\"Name\": \"Gallery\", \"Vents\": [{\"Name\": \"EmeraldVent1\", \"ObjectName\": \"emeraldvent1\"}], \"Cams\": [{\"Name\": \"Gallery\", \"ObjectName\": \"cam\", \"Offset\": {\"X\": 1.2, \"Y\": 2.1}}]}]}";
-                    var data = CustomMap.MapData;//JsonSerializer.Deserialize<MapData>(jsonString);
-                    Logger<ApolloPlugin>.Info(data.Name);
-                    Logger<ApolloPlugin>.Info(data.Rooms.Values.ToList()[0].Vents[0].ObjectName);
-                    Logger<ApolloPlugin>.Info(data.Rooms.Values.ToList()[0].Cams[0].Offset.ToVector2.x);
+                    
                 }
             }
         }
