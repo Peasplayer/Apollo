@@ -4,5 +4,6 @@
     {
         public string Name { get; set; }
         public string ObjectName { get; set; }
+        public bool Short { get; set; }
     }
 }

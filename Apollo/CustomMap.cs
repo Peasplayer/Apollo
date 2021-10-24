@@ -23,7 +23,8 @@ namespace Apollo
         public static SurvCamera PolusCamPrefab;
         public static Vent SkeldVentPrefab;
         public static Vent PolusVentPrefab;
-        public static GameObject LadderPrefab;
+        public static GameObject ShortLadderPrefab;
+        public static GameObject LongLadderPrefab;
 
         public static AsyncOperationHandle<GameObject> SkeldPrefab;
         public static AsyncOperationHandle<GameObject> MiraPrefab;
@@ -167,26 +168,46 @@ namespace Apollo
             {
                 var airshipPrefab = AirshipPrefab.Result;
 
-                var ladderPrefab =
+                var shortLadderPrefab =
                     Object.Instantiate(
                         airshipPrefab.GetComponentInChildren<Ladder>().transform.parent.gameObject);
-                var ladderTop = ladderPrefab.GetComponentsInChildren<Ladder>()
+                var shortLadderTop = shortLadderPrefab.GetComponentsInChildren<Ladder>()
                     .FirstOrDefault(ladder => ladder.IsTop);
-                var ladderBottom = ladderPrefab.GetComponentsInChildren<Ladder>()
+                var shortLadderBottom = shortLadderPrefab.GetComponentsInChildren<Ladder>()
                     .FirstOrDefault(ladder => !ladder.IsTop);
 
-                ladderPrefab.name = "LadderPrefab";
-                ladderTop.name = "LadderTop";
-                ladderTop.Destination = ladderBottom;
-                ladderBottom.name = "LadderBottom";
-                ladderBottom.Destination = ladderTop;
+                shortLadderPrefab.name = "LadderPrefab";
+                shortLadderTop.name = "LadderTop";
+                shortLadderTop.Destination = shortLadderBottom;
+                shortLadderBottom.name = "LadderBottom";
+                shortLadderBottom.Destination = shortLadderTop;
 
                 var pos = new Vector3(0f, 0f);
-                ladderPrefab.transform.position = pos - new Vector3(0f, 0.8f);
-                ladderBottom.transform.position = pos - new Vector3(0f, 2.58f);
-                ladderTop.transform.position = pos;
-                ladderPrefab.SetActive(false);
-                LadderPrefab = ladderPrefab;
+                shortLadderPrefab.transform.position = pos - new Vector3(0f, 1f);
+                shortLadderBottom.transform.position = pos - new Vector3(0f, 2.78f);
+                shortLadderTop.transform.position = pos;
+                shortLadderPrefab.SetActive(false);
+                ShortLadderPrefab = shortLadderPrefab;
+                
+                var longLadderPrefab =
+                    Object.Instantiate(
+                        airshipPrefab.transform.FindChild("MeetingRoom").FindChild("ladder_meeting").gameObject);
+                var longLadderTop = longLadderPrefab.GetComponentsInChildren<Ladder>()
+                    .FirstOrDefault(ladder => ladder.IsTop);
+                var longLadderBottom = longLadderPrefab.GetComponentsInChildren<Ladder>()
+                    .FirstOrDefault(ladder => !ladder.IsTop);
+
+                longLadderPrefab.name = "LadderPrefab";
+                longLadderTop.name = "LadderTop";
+                longLadderTop.Destination = longLadderBottom;
+                longLadderBottom.name = "LadderBottom";
+                longLadderBottom.Destination = longLadderTop;
+
+                longLadderPrefab.transform.position = pos - new Vector3(0f, 2.9f);
+                longLadderBottom.transform.position = pos - new Vector3(0f, 6.6f);
+                longLadderTop.transform.position = pos;
+                longLadderPrefab.SetActive(false);
+                LongLadderPrefab = longLadderPrefab;
 
                 airshipPrefab.Destroy();
             }
@@ -240,7 +261,7 @@ namespace Apollo
         {
             var ladderObject = room.FindChild(ladderData.ObjectName).gameObject;
             var ladderObjectPos = ladderObject.transform.position;
-            var ladderParent = Object.Instantiate(LadderPrefab, room.transform);
+            var ladderParent = Object.Instantiate(ladderData.Short ? ShortLadderPrefab : LongLadderPrefab, room.transform);
             var ladderTop = ladderParent.GetComponentsInChildren<Ladder>()
                 .FirstOrDefault(ladder => ladder.IsTop);
             var ladderBottom = ladderParent.GetComponentsInChildren<Ladder>()
@@ -252,10 +273,8 @@ namespace Apollo
             ladderTop.Destination = ladderBottom;
             ladderBottom.name = "LadderBottom";
             ladderBottom.Destination = ladderTop;
-
-            ladderParent.transform.position = ladderObjectPos - new Vector3(0f, 0.8f);
-            ladderBottom.transform.position = ladderObjectPos - new Vector3(0f, 2.58f);
-            ladderTop.transform.position = ladderObjectPos;
+            ladderParent.transform.position = ladderObjectPos;
+            
             ladderObject.Destroy();
         }
     }
