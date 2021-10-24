@@ -31,8 +31,6 @@ namespace Apollo
 
         public static IEnumerator CoSetupMap(ShipStatus ship)
         {
-            yield return HudManager.Instance.CoFadeFullScreen(Color.clear, Color.black);
-
             ship.InitialSpawnCenter =
                 ship.MeetingSpawnCenter =
                     Map.transform.FindChild("[SPAWN]").transform.position;
@@ -73,11 +71,8 @@ namespace Apollo
                 laptopPrefab.Destroy();
             }
 
-            yield return new WaitForSeconds(3f);
-
+            yield return CoLoadAllMaps();
             yield return CoCreatePrefabs();
-
-            yield return HudManager.Instance.CoFadeFullScreen(Color.black, Color.clear);
 
             foreach (var roomData in MapData.Rooms)
             {
@@ -113,14 +108,14 @@ namespace Apollo
 
         public static IEnumerator CoLoadAllMaps()
         {
-            SkeldPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[0].InstantiateAsync();
-            yield return SkeldPrefab;
+            SkeldPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[0].LoadAsset<GameObject>();
+            while (!SkeldPrefab.IsDone) yield return null;
 
-            MiraPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[1].InstantiateAsync();
-            yield return MiraPrefab;
+            MiraPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[1].LoadAsset<GameObject>();
+            while (!MiraPrefab.IsDone) yield return null;
 
-            AirshipPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[4].InstantiateAsync();
-            yield return AirshipPrefab;
+            AirshipPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[4].LoadAsset<GameObject>();
+            while (!AirshipPrefab.IsDone) yield return null;
         }
 
         public static IEnumerator CoCreatePrefabs()
