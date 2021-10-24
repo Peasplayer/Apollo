@@ -1,9 +1,0 @@
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\bin\Debug\netstandard2.1\Apollo.deps.json
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\bin\Debug\netstandard2.1\Apollo.dll
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\bin\Debug\netstandard2.1\Apollo.pdb
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.csprojAssemblyReference.cache
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.AssemblyInfoInputs.cache
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.AssemblyInfo.cs
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.csproj.CoreCompileInputs.cache
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.dll
-C:\Users\angel\Desktop\TestProjects\Csharp\Apollo\Apollo\obj\Debug\netstandard2.1\Apollo.pdb
