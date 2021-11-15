@@ -13,13 +13,13 @@ using UnityEngine;
 
 namespace Apollo
 {
-    [BepInPlugin(Id)]
+    [BepInPlugin(Id, "Apollo", Version)]
     [BepInProcess("Among Us.exe")]
     [BepInDependency(ReactorPlugin.Id)]
     public class ApolloPlugin : BasePlugin
     {
         public const string Id = "gg.astral.apollo";
-
+        public const string Version = "1.0.0";
         public Harmony Harmony { get; } = new Harmony(Id);
 
         public static AssetBundle Bundle;

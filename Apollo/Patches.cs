@@ -26,53 +26,7 @@ namespace Apollo
                 __instance.Clear();
             }
         }
-        
-        [HarmonyPatch(typeof(UseButtonManager), nameof(UseButtonManager.SetTarget))]
-        [HarmonyPrefix]
-        public static bool UseButtonManagerFix(UseButtonManager __instance, [HarmonyArgument(0)] IUsable target)
-        {
-            __instance.currentTarget = target;
-            __instance.RefreshButtons();
-            if (target != null)
-            {
-#pragma warning disable 184
-                if (target is Vent)
-                {
-                    Logger<ApolloPlugin>.Info("5");
-                    __instance.currentButtonShown = __instance.otherButtons[ImageNames.VentButton];
-                    Logger<ApolloPlugin>.Info("6");
-                }
-                else if (target is OptionsConsole)
-#pragma warning restore 184
-                {
-                    Logger<ApolloPlugin>.Info("7");
-                    __instance.currentButtonShown = __instance.otherButtons[ImageNames.OptionsButton];
-                    Logger<ApolloPlugin>.Info("8");
-                }
-                else if (__instance.otherButtons != null && __instance.otherButtons.ContainsKey(target.UseIcon))
-                {
-                    __instance.currentButtonShown = __instance.otherButtons[target.UseIcon];
-                    __instance.currentButtonShown.graphic.color = UseButtonManager.EnabledColor;
-                    __instance.currentButtonShown.text.color = UseButtonManager.EnabledColor;
-                }
-                if (__instance.currentButtonShown != null)
-                    __instance.currentButtonShown.Show(target.PercentCool);
-                return false;
-            }
-            PlayerControl localPlayer = PlayerControl.LocalPlayer;
-            if ((localPlayer != null ? localPlayer.Data : null) != null && PlayerControl.LocalPlayer.Data.IsImpostor && PlayerControl.LocalPlayer.CanMove)
-            {
-                __instance.currentButtonShown = __instance.otherButtons[ImageNames.SabotageButton];
-                __instance.currentButtonShown.Show();
-                return false;
-            }
-            __instance.currentButtonShown = __instance.otherButtons[ImageNames.UseButton];
-            __instance.currentButtonShown.Show();
-            __instance.currentButtonShown.graphic.color = UseButtonManager.DisabledColor;
-            __instance.currentButtonShown.text.color = UseButtonManager.DisabledColor;
-            return false;
-        }
-        
+
         public static int ShipStatusAwakeCount;
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
         [HarmonyPrefix]
@@ -179,8 +133,8 @@ namespace Apollo
         {
             Coroutines.Start(CheckIfUseCustomMap());
             
-            if (!GameOptionsData.MapNames.Contains(CustomMap.MapData.Name))
-                GameOptionsData.MapNames = GameOptionsData.MapNames.Add(CustomMap.MapData.Name);
+            if (!Constants.MapNames.Contains(CustomMap.MapData.Name))
+                Constants.MapNames = Constants.MapNames.Add(CustomMap.MapData.Name);
             
             if (AmongUsClient.Instance.ShipPrefabs.ToArray().Count != 5)
             {

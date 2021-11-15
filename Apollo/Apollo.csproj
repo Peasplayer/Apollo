@@ -1,24 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
-        <Version>1.0.0</Version>
-        <Description>Custom Maps made with Unity</Description>
-        <Authors>Astral</Authors>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    
+    <Version>1.0.0</Version>
+    <Description>Custom Maps made with Unity</Description>
+    <Authors>Astral</Authors>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <GamePlatform Condition="'$(GamePlatform)' == ''">Steam</GamePlatform>
+    <GameVersion Condition="'$(GamePlatform)' == 'Steam'">2021.11.9</GameVersion>
+    <GameVersion Condition="'$(GamePlatform)' == 'Itch'">2021.11.9</GameVersion>
+  </PropertyGroup>
 
-        <GameVersion Condition="'$(GamePlatform)' == 'Steam'">2021.6.30s</GameVersion>
-        <GameVersion Condition="'$(GamePlatform)' == 'Itch'">2021.6.30i</GameVersion>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*" />
+    <PackageReference Include="Reactor" Version="1.1.0-ci.110" />
 
-    <Target Name="Copy" AfterTargets="Build">
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
-    </Target>
+    <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-be.518" />
+    <PackageReference Include="AmongUs.GameLibs.$(GamePlatform)" Version="$(GameVersion)" PrivateAssets="all" />
 
-    <ItemGroup>
-        <EmbeddedResource Include="Assets\*" />
-        
-        <PackageReference Include="Reactor" Version="1.0.0-rc.1" />
-        <PackageReference Include="Reactor.MSBuild" Version="0.1.5" PrivateAssets="all" />
-        <PackageReference Include="System.Text.Json" Version="5.0.2" />
-    </ItemGroup>
+    <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="1.0.2.2-dev" PrivateAssets="all" />
+
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+  <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUs)/BepInEx/plugins/" UseSymboliclinksIfPossible="true" />
+  </Target>
 </Project>
