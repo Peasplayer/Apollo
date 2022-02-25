@@ -50,10 +50,22 @@ namespace Apollo
                 Logger<ApolloPlugin>.Error("Failed to load main AssetBundle - " + e);
             }
 
-            CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("Map.prefab").DontUnload();
-            CustomMap.MapLogo = Bundle.LoadAsset<Sprite>("logo.png").DontUnload();
-            CustomMap.MapData = JsonSerializer.Deserialize<MapData>((Bundle.LoadAsset<TextAsset>("Data.json").DontUnload().text));
+            try
+            {
+                CustomMap.MapPrefab = Bundle.LoadAsset<GameObject>("Map.prefab")?.DontUnload();
+                CustomMap.MapLogo = Bundle.LoadAsset<Sprite>("logo.png")?.DontUnload();
+                CustomMap.MapData =
+                    JsonSerializer.Deserialize<MapData>(Bundle.LoadAsset<TextAsset>("Data.json")?.DontUnload().text);
+            }
+            catch (Exception e)
+            {
+                Logger<ApolloPlugin>.Error("AssetBundle doesn't contain a map - " + e);
+                return;
+            }
 
+            if (CustomMap.MapPrefab == null || CustomMap.MapLogo == null || CustomMap.MapData == null)
+                throw new NullReferenceException($"AssetBundle doesn't contain a map: MapPrefab: {CustomMap.MapPrefab == null}; MapLogo: {CustomMap.MapLogo == null}; MapData: {CustomMap.MapData == null}");
+            
             Harmony.PatchAll();
         }
 

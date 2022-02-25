@@ -80,7 +80,7 @@ namespace Apollo
             if (ShipStatusStartCount == 1)
                 return false;
             
-            if (CustomMap.UseCustomMap)
+            if (CustomMap.UseCustomMap && CustomMap.MapPrefab != null)
             {
                 ShipStatusStartCount++;
                 __instance.transform.gameObject.SetActive(false);
