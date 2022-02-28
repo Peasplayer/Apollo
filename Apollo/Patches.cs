@@ -151,7 +151,8 @@ namespace Apollo
             if (!AmongUsClient.Instance.AmHost)
             {
                 yield return new WaitForSeconds(1f);
-                Rpc<CustomRpc.RpcSendHandshake>.Instance.Send(PlayerControl.LocalPlayer.PlayerId);
+                CustomRpc.RpcSendHandShake(PlayerControl.LocalPlayer);
+                //Rpc<CustomRpc.RpcSendHandshake>.Instance.Send(PlayerControl.LocalPlayer.PlayerId);
             }
         }
 
@@ -224,12 +225,14 @@ namespace Apollo
             if (option.GetInt() == 5 && !CustomMap.UseCustomMap)
             {
                 CustomMap.UseCustomMap = true;
-                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(true);
+                CustomRpc.RpcUseCustomMap(PlayerControl.LocalPlayer, byte.MaxValue, true);
+                //Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(true);
             }
             else if (option.GetInt() != 5 && CustomMap.UseCustomMap)
             {
                 CustomMap.UseCustomMap = false;
-                Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(false);
+                CustomRpc.RpcUseCustomMap(PlayerControl.LocalPlayer, byte.MaxValue, false);
+                //Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(false);
             }
         });
 
@@ -340,6 +343,17 @@ namespace Apollo
                 PlayerControl.GameOptions.MapId = 2;
                 CustomMap.UseCustomMap = true;
             }
+        }
+
+        [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.Use), new Type[0] )]
+        [HarmonyPrefix]
+        public static bool ReplaceUsePlatform(MovingPlatformBehaviour __instance)
+        {
+            if (!CustomMap.UseCustomMap)
+                return true;
+            
+            CustomRpc.RpcUsePlatform(PlayerControl.LocalPlayer, __instance.GetID());
+            return false;
         }
         
         [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]

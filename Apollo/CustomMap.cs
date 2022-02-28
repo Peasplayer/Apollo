@@ -27,6 +27,8 @@ namespace Apollo
         public static Vent PolusVentPrefab;
         public static GameObject ShortLadderPrefab;
         public static GameObject LongLadderPrefab;
+        public static MovingPlatformBehaviour PlatformPrefab;
+        public static PlatformConsole PlatformConsolePrefab;
 
         public static AsyncOperationHandle<GameObject> SkeldPrefab;
         public static AsyncOperationHandle<GameObject> MiraPrefab;
@@ -226,6 +228,16 @@ namespace Apollo
                 longLadderTop.transform.position = pos;
                 longLadderPrefab.SetActive(false);
                 LongLadderPrefab = longLadderPrefab;
+                
+                var platformPrefab = Object.Instantiate(airshipPrefab.GetComponentInChildren<MovingPlatformBehaviour>());
+                platformPrefab.name = "PlatformPrefab";
+                platformPrefab.gameObject.SetActive(false);
+                PlatformPrefab = platformPrefab;
+                
+                var platformConsolePrefab = Object.Instantiate(airshipPrefab.GetComponentInChildren<PlatformConsole>());
+                platformConsolePrefab.name = "PlatformConsolePrefab";
+                platformConsolePrefab.gameObject.SetActive(false);
+                PlatformConsolePrefab = platformConsolePrefab;
 
                 airshipPrefab.Destroy();
             }

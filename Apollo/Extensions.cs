@@ -83,5 +83,12 @@ namespace Apollo
             transform.position = position;
             return position;
         }
+
+        public static int GetID(this MovingPlatformBehaviour platform)
+        {
+            if (MovingPlatformHandler.Platforms.Find(item => item.PlatformBehaviour == platform) != null)
+                return MovingPlatformHandler.Platforms.Find(item => item.PlatformBehaviour == platform).ID;
+            return -1;
+        }
     }
 }
