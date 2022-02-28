@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Apollo.Data;
 using HarmonyLib;
@@ -31,8 +32,14 @@ namespace Apollo
         public static AsyncOperationHandle<GameObject> MiraPrefab;
         public static AsyncOperationHandle<GameObject> AirshipPrefab;
 
+        public static List<Ladder> AllLadders = new List<Ladder>();
+        public static byte CurrentLadderId;
+
         public static IEnumerator CoSetupMap(ShipStatus ship)
         {
+            AllLadders = new List<Ladder>();
+            CurrentLadderId = 0;
+            
             ship.InitialSpawnCenter =
                 ship.MeetingSpawnCenter =
                     Map.transform.FindChild("[SPAWN]").transform.position;
@@ -280,10 +287,19 @@ namespace Apollo
 
             ladderParent.name = ladderData.Name;
             ladderParent.gameObject.SetActive(true);
+            
             ladderTop.name = "LadderTop";
             ladderTop.Destination = ladderBottom;
+            ladderTop.Id = CurrentLadderId;
+            CurrentLadderId += 1;
+            AllLadders.Add(ladderTop);
+            
             ladderBottom.name = "LadderBottom";
             ladderBottom.Destination = ladderTop;
+            ladderBottom.Id = CurrentLadderId;
+            CurrentLadderId += 1;
+            AllLadders.Add(ladderBottom);
+            
             ladderParent.transform.position = ladderObjectPos;
             
             ladderObject.Destroy();

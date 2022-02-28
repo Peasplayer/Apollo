@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Hazel;
 using Reactor;
 using Reactor.Networking;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace Apollo
         }
 
         public static int ShipStatusAwakeCount;
+        
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Awake))]
         [HarmonyPrefix]
         public static bool CheckIfShouldExecuteShipStatusAwake(ShipStatus __instance)
@@ -57,9 +59,9 @@ namespace Apollo
             public static void Prefix(RoomTracker._CoSlideIn_d__11 __instance)
             {
                 var customRoomName = "";
-                foreach(var room in CustomRoomNames)
+                foreach (var room in CustomRoomNames)
                 {
-                    if(room.Key == __instance.newRoom)
+                    if (room.Key == __instance.newRoom)
                     {
                         customRoomName = room.Value;
                     }
@@ -73,6 +75,7 @@ namespace Apollo
         }
 
         public static int ShipStatusStartCount;
+        
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Start))]
         [HarmonyPrefix]
         public static bool InitializeMap(ShipStatus __instance)
@@ -132,10 +135,10 @@ namespace Apollo
         public static void SendCustomHandshake(AmongUsClient __instance)
         {
             Coroutines.Start(CheckIfUseCustomMap());
-            
+
             if (!Constants.MapNames.Contains(CustomMap.MapData.Name))
                 Constants.MapNames = Constants.MapNames.Add(CustomMap.MapData.Name);
-            
+
             if (AmongUsClient.Instance.ShipPrefabs.ToArray().Count != 5)
             {
                 var map = AmongUsClient.Instance.ShipPrefabs.ToArray()[2];
@@ -153,7 +156,7 @@ namespace Apollo
         }
 
         [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Show))]
-        public static class AddMapToOnline
+        public static class AddMapToCreateGameScreen
         {
             private static Transform customMapButton;
 
@@ -174,7 +177,7 @@ namespace Apollo
                         child.transform.localScale /= 1.25f;
                         child.transform.SetX(child.transform.position.x - 0.3f * (i + 1));
                         child.GetComponentInChildren<SpriteRenderer>().enabled = true;
-                        _child.OnClick.AddListener((UnityAction)listener1);
+                        _child.OnClick.AddListener((UnityAction)NormalButtonListener);
                     }
 
                     customMapButton =
@@ -190,18 +193,19 @@ namespace Apollo
 
                     var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick = new ButtonClickedEvent();
-                    button.OnClick.AddListener((UnityAction)listener2);
+                    button.OnClick.AddListener((UnityAction)CustomButtonListener);
 
                     mapButtons[2].OnClick.AddListener((UnityAction)listener3);
 
-                    void listener1()
+                    void NormalButtonListener()
                     {
                         CustomMap.UseCustomMap = false;
                         customMapButton.GetComponent<SpriteRenderer>().enabled = false;
                     }
 
-                    void listener2()
+                    void CustomButtonListener()
                     {
+                        mapButtons[2].OnClick.Invoke();
                         CustomMap.UseCustomMap = true;
                         customMapButton.GetComponent<SpriteRenderer>().enabled = true;
                         mapButtons[2].GetComponent<SpriteRenderer>().enabled = false;
@@ -214,7 +218,7 @@ namespace Apollo
                 }
             }
         }
-        
+
         private static Action<KeyValueOption> HandleMapOption = new Action<KeyValueOption>(option =>
         {
             if (option.GetInt() == 5 && !CustomMap.UseCustomMap)
@@ -231,19 +235,79 @@ namespace Apollo
 
         [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
         [HarmonyPrefix]
-        public static void AddMapToLocal(GameOptionsMenu __instance)
+        public static void AddMapToOption(GameOptionsMenu __instance)
         {
-            if (AmongUsClient.Instance.GameMode == GameModes.LocalGame)
-            {
-                var mapOption = Object.FindObjectOfType<KeyValueOption>();
+            var mapOption = Object.FindObjectOfType<KeyValueOption>();
                 
-                if (mapOption.Values.Count == 4)
+            if (mapOption != null && mapOption.Values.Count == 4)
+            {
+                var item = mapOption.Values.ToArray().First();
+                item.key = CustomMap.MapData.Name;
+                item.value = 5;
+                mapOption.Values.Add(item);
+
+                if (CustomMap.UseCustomMap)
                 {
-                    var item = mapOption.Values.ToArray().First();
-                    item.key = CustomMap.MapData.Name;
-                    item.value = 5;
-                    mapOption.Values.Add(item);
+                    while (mapOption.GetInt() != 5)
+                        mapOption.Increase();
                 }
+            }
+        }
+
+        /*[HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.AppendItem), new []{ typeof(StringBuilder), typeof(StringNames), typeof(string) })]
+        [HarmonyPrefix]
+        public static bool ShowCustomMapName(GameOptionsData __instance, StringBuilder settings, StringNames stringName, string value)
+        {
+            if (stringName != StringNames.GameMapName && !CustomMap.UseCustomMap)
+                return true;
+            
+            settings.Append(TranslationController.Instance.GetString(stringName));
+            settings.Append(": ");
+            settings.AppendLine(CustomMap.MapData.Name);
+            return false;
+        }*/
+        
+        [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.HandleRpc))]
+        [HarmonyPrefix]
+        public static bool FixClimbLadderRpcHandling(PlayerPhysics __instance, [HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
+        {
+            if (!CustomMap.UseCustomMap)
+                return true;
+
+            if (callId <= 20)
+            {
+                if (callId == 19)
+                {
+                    int id = reader.ReadPackedInt32();
+                    __instance.StopAllCoroutines();
+                    __instance.StartCoroutine(__instance.CoEnterVent(id));
+                    return false;
+                }
+                if (callId != 20)
+                {
+                    return false;
+                }
+                int id2 = reader.ReadPackedInt32();
+                __instance.StopAllCoroutines();
+                __instance.StartCoroutine(__instance.CoExitVent(id2));
+                return false;
+            }
+            else
+            {
+                if (callId == 31)
+                {
+                    byte ladderId = reader.ReadByte();
+                    byte climbLadderSid = reader.ReadByte();
+                    __instance.ClimbLadder(CustomMap.AllLadders.First(f => f.Id == ladderId), climbLadderSid);
+                    return false;
+                }
+                if (callId != 34)
+                {
+                    return false;
+                }
+                int ventId = reader.ReadPackedInt32();
+                __instance.BootFromVent(ventId);
+                return false;
             }
         }
 
