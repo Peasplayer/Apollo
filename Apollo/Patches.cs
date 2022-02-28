@@ -77,7 +77,7 @@ namespace Apollo
         [HarmonyPrefix]
         public static bool InitializeMap(ShipStatus __instance)
         {
-            if (ShipStatusStartCount == 1)
+            if (ShipStatusStartCount == 1 && CustomMap.UseCustomMap)
                 return false;
             
             if (CustomMap.UseCustomMap && CustomMap.MapPrefab != null)

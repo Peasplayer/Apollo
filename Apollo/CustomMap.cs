@@ -7,6 +7,7 @@ using Reactor.Extensions;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
+using Vector2 = UnityEngine.Vector2;
 
 namespace Apollo
 {
@@ -37,6 +38,16 @@ namespace Apollo
                     Map.transform.FindChild("[SPAWN]").transform.position;
             Map.transform.FindChild("[SPAWN]").gameObject.Destroy();
             Map.transform.SetZ(2);
+
+            if (Map.transform.FindChild("Background") == null)
+            {
+                var background = new GameObject("Background");
+                background.transform.SetParent(Map.transform);
+                background.transform.position = new Vector3(0f, 0f, 100f);
+                var texture = Texture2D.grayTexture;
+                var rend = background.AddComponent<SpriteRenderer>();
+                rend.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 0.01f);
+            }
 
             var emergencyButtonPrefab = GameObject.Find("EmergencyButton");
             if (emergencyButtonPrefab != null)
