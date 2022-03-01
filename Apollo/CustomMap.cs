@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Apollo.Data;
+using BepInEx.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Reactor;
 using Reactor.Extensions;
@@ -30,23 +31,20 @@ namespace Apollo
         public static MovingPlatformBehaviour PlatformPrefab;
         public static PlatformConsole PlatformConsolePrefab;
 
-        public static AsyncOperationHandle<GameObject> SkeldPrefab;
-        public static AsyncOperationHandle<GameObject> MiraPrefab;
-        public static AsyncOperationHandle<GameObject> AirshipPrefab;
-
         public static List<Ladder> AllLadders = new List<Ladder>();
         public static byte CurrentLadderId;
 
         public static IEnumerator CoSetupMap(ShipStatus ship)
         {
-            AllLadders = new List<Ladder>();
-            CurrentLadderId = 0;
-            
             ship.InitialSpawnCenter =
-                ship.MeetingSpawnCenter =
+                ship.MeetingSpawnCenter = 
+                    ship.MeetingSpawnCenter2 =
                     Map.transform.FindChild("[SPAWN]").transform.position;
             Map.transform.FindChild("[SPAWN]").gameObject.Destroy();
             Map.transform.SetZ(2);
+
+            if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
+                Coroutines.Start(HudManager.Instance.CoFadeFullScreen(Color.clear, Color.black, 0f).WrapToManaged());
 
             if (Map.transform.FindChild("Background") == null)
             {
@@ -66,7 +64,7 @@ namespace Apollo
                         ship.transform.FindChild("Office").FindChild("caftable").FindChild("EmergencyButton"),
                         emergencyButtonPrefab.transform.parent);
                 emergencyButton.position = emergencyButtonPrefab.transform.position;
-                ship.MeetingSpawnCenter = emergencyButtonPrefab.transform.position;
+                ship.MeetingSpawnCenter = ship.MeetingSpawnCenter2 = emergencyButtonPrefab.transform.position;
                 emergencyButtonPrefab.Destroy();
             }
 
@@ -92,7 +90,6 @@ namespace Apollo
                 laptopPrefab.Destroy();
             }
 
-            yield return CoLoadAllMaps();
             yield return CoCreatePrefabs();
 
             foreach (var roomData in MapData.Rooms)
@@ -120,23 +117,22 @@ namespace Apollo
 
                 if (roomData.Value.Ladders != null)
                     roomData.Value.Ladders.Do(data => CreateLadder(roomGround, data));
+                
+                if (roomData.Value.Platforms != null)
+                    roomData.Value.Platforms.Do(data => CreatePlatform(roomGround, data));
 
                 Logger<ApolloPlugin>.Info("ADDED " + roomData.Key);
             }
 
             Patches.ShipStatusAwakeCount = Patches.ShipStatusStartCount = 0;
-        }
-
-        public static IEnumerator CoLoadAllMaps()
-        {
-            SkeldPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[0].LoadAsset<GameObject>();
-            while (!SkeldPrefab.IsDone) yield return null;
-
-            MiraPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[1].LoadAsset<GameObject>();
-            while (!MiraPrefab.IsDone) yield return null;
-
-            AirshipPrefab = AmongUsClient.Instance.ShipPrefabs.ToArray()[4].LoadAsset<GameObject>();
-            while (!AirshipPrefab.IsDone) yield return null;
+            
+            ship.SpawnPlayer(PlayerControl.LocalPlayer, GameData.Instance.PlayerCount, AmongUsClient.Instance.GameMode != GameModes.FreePlay);
+            PlayerControl.LocalPlayer.NetTransform.RpcSnapTo(PlayerControl.LocalPlayer.transform.position);
+            
+            if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
+                yield return HudManager.Instance.CoFadeFullScreen(Color.black, Color.clear, 0f);
+            
+            yield return Reset();
         }
 
         public static IEnumerator CoCreatePrefabs()
@@ -149,7 +145,7 @@ namespace Apollo
             polusCamPrefab.gameObject.SetActive(false);
             PolusCamPrefab = polusCamPrefab;
 
-            Vent polusVentPrefab = Object.Instantiate(ship.GetComponentInChildren<Vent>());
+            var polusVentPrefab = Object.Instantiate(ship.GetComponentInChildren<Vent>());
             polusVentPrefab.name = "PolusVentPrefab";
             polusVentPrefab.Left = null;
             polusVentPrefab.Right = null;
@@ -157,9 +153,18 @@ namespace Apollo
             polusVentPrefab.gameObject.SetActive(false);
             PolusVentPrefab = polusVentPrefab;
 
-            if (SkeldPrefab.IsDone)
+            AsyncOperationHandle<GameObject> skeldPrefabOperation = AmongUsClient.Instance.ShipPrefabs.ToArray()[0].InstantiateAsync(null, false);
+            while (!skeldPrefabOperation.IsDone) yield return null;
+
+            AsyncOperationHandle<GameObject> miraPrefabOperation = AmongUsClient.Instance.ShipPrefabs.ToArray()[1].InstantiateAsync(null, false);
+            while (!miraPrefabOperation.IsDone) yield return null;
+
+            AsyncOperationHandle<GameObject> airshipPrefabOperation = AmongUsClient.Instance.ShipPrefabs.ToArray()[4].InstantiateAsync(null, false);
+            while (!airshipPrefabOperation.IsDone) yield return null;
+            
+            if (skeldPrefabOperation.IsDone)
             {
-                var skeldPrefab = SkeldPrefab.Result;
+                var skeldPrefab = skeldPrefabOperation.Result;
 
                 var skeldCamPrefab = Object.Instantiate(skeldPrefab.GetComponentInChildren<SurvCamera>());
                 skeldCamPrefab.name = "SkeldCamPrefab";
@@ -178,15 +183,15 @@ namespace Apollo
                 skeldPrefab.Destroy();
             }
 
-            if (MiraPrefab.IsDone)
+            if (miraPrefabOperation.IsDone)
             {
-                var miraPrefab = MiraPrefab.Result;
+                var miraPrefab = miraPrefabOperation.Result;
                 miraPrefab.Destroy();
             }
 
-            if (AirshipPrefab.IsDone)
+            if (airshipPrefabOperation.IsDone)
             {
-                var airshipPrefab = AirshipPrefab.Result;
+                var airshipPrefab = airshipPrefabOperation.Result;
 
                 var shortLadderPrefab =
                     Object.Instantiate(
@@ -315,6 +320,60 @@ namespace Apollo
             ladderParent.transform.position = ladderObjectPos;
             
             ladderObject.Destroy();
+        }
+
+        public static void CreatePlatform(Transform room, PlatformData platformData)
+        {
+            var left = room.FindChild(platformData.LeftUseObject);
+            var right = room.FindChild(platformData.RightUseObject);
+            
+            var platformParent = new GameObject(platformData.Name);
+            platformParent.transform.parent = room;
+            
+            var platform = Object.Instantiate(PlatformPrefab, platformParent.transform);
+            platform.name = "Platform";
+            platform.transform.position = platformData.StartLeft ? left.position : right.position;
+            platform.LeftUsePosition = left.position;
+            platform.LeftPosition = left.position + new Vector3(1.5f, 0f);
+            platform.IsLeft = platformData.StartLeft;
+            platform.RightPosition = right.position - new Vector3(1.5f, 0f);
+            platform.RightUsePosition = right.position;
+            platform.gameObject.SetActive(true);
+            platform.transform.FindChild("Fan").gameObject.SetActive(platformData.ShowFan);
+
+            var console1 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
+            platform.name = "LeftConsole";
+            console1.transform.position = left.position;
+            console1.Image = platform.GetComponent<SpriteRenderer>();
+            console1.gameObject.SetActive(true);
+
+            var console2 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
+            platform.name = "RightConsole";
+            console2.transform.position = right.position;
+            console2.Image = platform.GetComponent<SpriteRenderer>();
+            console2.gameObject.SetActive(true);
+
+            console1.Platform = console2.Platform = platform;
+
+            MovingPlatformHandler.Platforms.Add(new MovingPlatform(platform, console1, console2));
+            
+            left.gameObject.Destroy();
+            right.gameObject.Destroy();
+        }
+
+        public static IEnumerator Reset()
+        {
+            SkeldCamPrefab = null;
+            PolusCamPrefab = null;
+            SkeldVentPrefab = null;
+            PolusVentPrefab = null;
+            ShortLadderPrefab = null;
+            LongLadderPrefab = null;
+            PlatformPrefab = null;
+            PlatformConsolePrefab = null;
+            AllLadders = new List<Ladder>();
+            CurrentLadderId = 0;
+            yield break;
         }
     }
 }

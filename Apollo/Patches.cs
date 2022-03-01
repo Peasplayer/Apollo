@@ -5,7 +5,7 @@ using System.Linq;
 using HarmonyLib;
 using Hazel;
 using Reactor;
-using Reactor.Networking;
+using Reactor.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using static UnityEngine.UI.Button;
@@ -92,6 +92,8 @@ namespace Apollo
                 map.SetActive(true);
                 map.transform.position = __instance.transform.position;
 
+                if (CustomMap.Map != null)
+                    CustomMap.Map.Destroy();
                 CustomMap.Map = map;
                 Coroutines.Start(CustomMap.CoSetupMap(__instance));
 
@@ -111,6 +113,12 @@ namespace Apollo
             {
                 if (customMapButton == null)
                 {
+	                foreach (var mapButton in __instance.transform.FindChild("Content")
+		                         .GetComponentsInChildren<PassiveButton>())
+	                {
+		                mapButton.OnClick.AddListener((UnityAction) NormalButtonListener);
+	                }
+	                
                     customMapButton =
                         Object.Instantiate(__instance.transform.FindChild("Content").FindChild("PlanetButton"),
                             __instance.transform.FindChild("Content"));
@@ -120,11 +128,16 @@ namespace Apollo
 
                     var button = customMapButton.GetComponent<PassiveButton>();
                     button.OnClick.RemoveAllListeners();
-                    button.OnClick.AddListener((UnityAction)listener);
+                    button.OnClick.AddListener((UnityAction) CustomButtonListener);
 
-                    void listener()
+                    void NormalButtonListener()
                     {
-                        CustomMap.UseCustomMap = true;
+                        CustomMap.UseCustomMap = false;
+                    }
+                    
+                    void CustomButtonListener()
+                    {
+	                    CustomMap.UseCustomMap = true;
                     }
                 }
             }
@@ -152,7 +165,6 @@ namespace Apollo
             {
                 yield return new WaitForSeconds(1f);
                 CustomRpc.RpcSendHandShake(PlayerControl.LocalPlayer);
-                //Rpc<CustomRpc.RpcSendHandshake>.Instance.Send(PlayerControl.LocalPlayer.PlayerId);
             }
         }
 
@@ -208,6 +220,7 @@ namespace Apollo
                     {
                         mapButtons[2].OnClick.Invoke();
                         CustomMap.UseCustomMap = true;
+                        SaveManager.GameHostOptions.MapId = 5;
                         customMapButton.GetComponent<SpriteRenderer>().enabled = true;
                         mapButtons[2].GetComponent<SpriteRenderer>().enabled = false;
                     }
@@ -226,13 +239,11 @@ namespace Apollo
             {
                 CustomMap.UseCustomMap = true;
                 CustomRpc.RpcUseCustomMap(PlayerControl.LocalPlayer, byte.MaxValue, true);
-                //Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(true);
             }
             else if (option.GetInt() != 5 && CustomMap.UseCustomMap)
             {
                 CustomMap.UseCustomMap = false;
                 CustomRpc.RpcUseCustomMap(PlayerControl.LocalPlayer, byte.MaxValue, false);
-                //Rpc<CustomRpc.RpcUseCustomMap>.Instance.Send(false);
             }
         });
 
@@ -256,19 +267,6 @@ namespace Apollo
                 }
             }
         }
-
-        /*[HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.AppendItem), new []{ typeof(StringBuilder), typeof(StringNames), typeof(string) })]
-        [HarmonyPrefix]
-        public static bool ShowCustomMapName(GameOptionsData __instance, StringBuilder settings, StringNames stringName, string value)
-        {
-            if (stringName != StringNames.GameMapName && !CustomMap.UseCustomMap)
-                return true;
-            
-            settings.Append(TranslationController.Instance.GetString(stringName));
-            settings.Append(": ");
-            settings.AppendLine(CustomMap.MapData.Name);
-            return false;
-        }*/
         
         [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.HandleRpc))]
         [HarmonyPrefix]
@@ -345,7 +343,7 @@ namespace Apollo
             }
         }
 
-        [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.Use), new Type[0] )]
+        [HarmonyPatch(typeof(MovingPlatformBehaviour), nameof(MovingPlatformBehaviour.Use), new Type[0])]
         [HarmonyPrefix]
         public static bool ReplaceUsePlatform(MovingPlatformBehaviour __instance)
         {

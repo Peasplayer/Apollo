@@ -4,14 +4,18 @@ namespace Apollo;
 
 public class MovingPlatform
 {
-    public MovingPlatform(MovingPlatformBehaviour platformBehaviour)
+    public MovingPlatform(MovingPlatformBehaviour platformBehaviour, PlatformConsole console1, PlatformConsole console2)
     {
         ID = MovingPlatformHandler.Platforms.Count;
         PlatformBehaviour = platformBehaviour;
+        Console1 = console1;
+        Console2 = console2;
     }
     
     public int ID;
     public MovingPlatformBehaviour PlatformBehaviour;
+    public PlatformConsole Console1;
+    public PlatformConsole Console2;
 }
 
 public static class MovingPlatformHandler
