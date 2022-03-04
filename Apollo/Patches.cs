@@ -86,7 +86,6 @@ namespace Apollo
             if (CustomMap.UseCustomMap && CustomMap.MapPrefab != null)
             {
                 ShipStatusStartCount++;
-                __instance.transform.gameObject.SetActive(false);
 
                 var map = Object.Instantiate(CustomMap.MapPrefab);
                 map.SetActive(true);

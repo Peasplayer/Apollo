@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Apollo.ExtendedClasses;
 using UnhollowerBaseLib;
 using UnityEngine;
 
@@ -38,9 +39,6 @@ namespace Apollo
             shipStatus.AllVents = new List<Vent>().ToArray();
             shipStatus.DummyLocations = new List<Transform>().ToArray();
             shipStatus.SpecialTasks = new List<PlayerTask>().ToArray();
-            //shipStatus.CommonTasks = new List<NormalPlayerTask>().ToArray();
-            //shipStatus.LongTasks = new List<NormalPlayerTask>().ToArray();
-            //shipStatus.NormalTasks = new List<NormalPlayerTask>().ToArray();
             shipStatus.FastRooms = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, PlainShipRoom>();
             shipStatus.SystemNames = new List<StringNames>().ToArray();
             //shipStatus.Systems = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, ISystemType>();
