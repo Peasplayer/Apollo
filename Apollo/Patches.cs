@@ -52,26 +52,17 @@ namespace Apollo
             else
                 CustomRoomNames.Add(type, name);
         }
-       
-        [HarmonyPatch(typeof(RoomTracker._CoSlideIn_d__11), nameof(RoomTracker._CoSlideIn_d__11.MoveNext))]
-        public static class RoomTrackerCustomRoomNames
-        {
-            public static void Prefix(RoomTracker._CoSlideIn_d__11 __instance)
-            {
-                var customRoomName = "";
-                foreach (var room in CustomRoomNames)
-                {
-                    if (room.Key == __instance.newRoom)
-                    {
-                        customRoomName = room.Value;
-                    }
-                }
 
-                if (customRoomName != "")
-                {
-                    __instance.__4__this.text.text = customRoomName;
-                }
-            }
+        [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.GetString),
+            new[] { typeof(SystemTypes) })]
+        [HarmonyPrefix]
+        public static bool ReplaceWithNewName(TranslationController __instance, ref string __result, [HarmonyArgument(0)] SystemTypes room)
+        {
+            if (!CustomRoomNames.ContainsKey(room))
+                return true;
+
+            __result = CustomRoomNames[room];
+            return false;
         }
 
         public static int ShipStatusStartCount;
@@ -95,9 +86,6 @@ namespace Apollo
                     CustomMap.Map.Destroy();
                 CustomMap.Map = map;
                 Coroutines.Start(CustomMap.CoSetupMap(__instance));
-
-                if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
-                    CustomMap.UseCustomMap = false;
             }
 
             return true;

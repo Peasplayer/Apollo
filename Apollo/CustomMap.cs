@@ -39,6 +39,9 @@ namespace Apollo
         public static Dictionary<TaskObjects.TaskType, GameObject> TaskPrefabs =
             new Dictionary<TaskObjects.TaskType, GameObject>();
         public static int CurrentConsoleId;
+        public static List<NormalPlayerTask> AllCommonTasks = new List<NormalPlayerTask>();
+        public static List<NormalPlayerTask> AllLongTasks = new List<NormalPlayerTask>();
+        public static List<NormalPlayerTask> AllNormalTasks = new List<NormalPlayerTask>();
         public static List<NormalPlayerTask> CommonTasks = new List<NormalPlayerTask>();
         public static List<NormalPlayerTask> LongTasks = new List<NormalPlayerTask>();
         public static List<NormalPlayerTask> NormalTasks = new List<NormalPlayerTask>();
@@ -48,6 +51,7 @@ namespace Apollo
 
         public static IEnumerator CoSetupMap(ShipStatus ship)
         {
+            yield return Reset();
             ship.InitialSpawnCenter =
                 ship.MeetingSpawnCenter =
                     ship.MeetingSpawnCenter2 =
@@ -110,20 +114,16 @@ namespace Apollo
                 Logger<ApolloPlugin>.Info("ADDED " + roomData.Key);
             }
             
-            ship.CommonTasks = new List<NormalPlayerTask>().ToArray();
-            foreach (var task in CommonTasks)
+            ship.CommonTasks = CommonTasks.ToArray();
+            ship.LongTasks = LongTasks.ToArray();
+            ship.NormalTasks = NormalTasks.ToArray();
+            try
             {
-                ship.CommonTasks = ship.CommonTasks.Add(task);
+                ship.Begin();
             }
-            ship.LongTasks = new List<NormalPlayerTask>().ToArray();
-            foreach (var task in LongTasks)
+            catch(Exception e)
             {
-                ship.LongTasks = ship.LongTasks.Add(task);
-            }
-            ship.NormalTasks = new List<NormalPlayerTask>().ToArray();
-            foreach (var task in NormalTasks)
-            {
-                ship.NormalTasks = ship.NormalTasks.Add(task);
+                Logger<ApolloPlugin>.Error("Couldn't assign tasks: " + e);
             }
 
             Patches.ShipStatusAwakeCount = Patches.ShipStatusStartCount = 0;
@@ -143,7 +143,7 @@ namespace Apollo
             if (AmongUsClient.Instance.GameMode == GameModes.FreePlay)
                 yield return HudManager.Instance.CoFadeFullScreen(Color.black, Color.clear, 0f);
 
-            yield return Reset();
+            yield return DestroyPrefabs();
         }
 
         public static IEnumerator CoCreatePrefabs()
@@ -187,6 +187,10 @@ namespace Apollo
             vitalsPrefab.name = "VitalsPrefab";
             vitalsPrefab.SetActive(false);
             SimpleObjectPrefabs.Add(SimpleObjectType.Vitals, vitalsPrefab);
+            
+            AllCommonTasks.AddRange(ship.CommonTasks);
+            AllLongTasks.AddRange(ship.LongTasks);
+            AllNormalTasks.AddRange(ship.NormalTasks);
 
             AsyncOperationHandle<GameObject> skeldPrefabOperation =
                 AmongUsClient.Instance.ShipPrefabs.ToArray()[0].InstantiateAsync(null, false);
@@ -205,7 +209,9 @@ namespace Apollo
                 var task = GameObject.Find(pair.Value);
                 if (task == null)
                     continue;
-                TaskPrefabs.Add(pair.Key, Object.Instantiate(task));
+                var prefab = Object.Instantiate(task);
+                prefab.SetActive(false);
+                TaskPrefabs.Add(pair.Key, prefab);
             }
             
             var skeldPrefab = skeldPrefabOperation.Result;
@@ -223,6 +229,10 @@ namespace Apollo
             skeldVentPrefab.Center = null;
             skeldVentPrefab.gameObject.SetActive(false);
             SkeldVentPrefab = skeldVentPrefab;
+            
+            AllCommonTasks.AddRange(skeldPrefab.GetComponent<ShipStatus>().CommonTasks);
+            AllLongTasks.AddRange(skeldPrefab.GetComponent<ShipStatus>().LongTasks);
+            AllNormalTasks.AddRange(skeldPrefab.GetComponent<ShipStatus>().NormalTasks);
 
             var miraPrefab = miraPrefabOperation.Result;
 
@@ -231,6 +241,10 @@ namespace Apollo
             miraEmergencyButtonPrefab.name = "MiraEmergencyButtonPrefab";
             miraEmergencyButtonPrefab.SetActive(false);
             SimpleObjectPrefabs.Add(SimpleObjectType.MiraEmergencyButton, miraEmergencyButtonPrefab);
+            
+            AllCommonTasks.AddRange(miraPrefab.GetComponent<ShipStatus>().CommonTasks);
+            AllLongTasks.AddRange(miraPrefab.GetComponent<ShipStatus>().LongTasks);
+            AllNormalTasks.AddRange(miraPrefab.GetComponent<ShipStatus>().NormalTasks);
 
             var airshipPrefab = airshipPrefabOperation.Result;
 
@@ -286,6 +300,10 @@ namespace Apollo
             platformConsolePrefab.gameObject.SetActive(false);
             PlatformConsolePrefab = platformConsolePrefab;
 
+            AllCommonTasks.AddRange(airshipPrefab.GetComponent<ShipStatus>().CommonTasks);
+            AllLongTasks.AddRange(airshipPrefab.GetComponent<ShipStatus>().LongTasks);
+            AllNormalTasks.AddRange(airshipPrefab.GetComponent<ShipStatus>().NormalTasks);
+            
             skeldPrefab.Destroy();
             miraPrefab.Destroy();
             airshipPrefab.Destroy();
@@ -311,6 +329,7 @@ namespace Apollo
                 var simpleObject = Object.Instantiate(originalObjectPrefab, room);
                 simpleObject.name = objectData.Name;
                 simpleObject.transform.position = originalSimpleObject.position;
+                simpleObject.transform.SetLocalZ(-0.001f);
 
                 var rend = simpleObject.GetComponent<SpriteRenderer>();
                 rend.flipX = objectData.FlipX;
@@ -335,114 +354,151 @@ namespace Apollo
 
         public static void CreateVent(Transform room, VentData ventData)
         {
-            var ship = ShipStatus.Instance;
-            var allVents = ship.AllVents.ToList();
-
-            var ventObject = room.FindChild(ventData.ObjectName).gameObject;
-
-            var vent = Object.Instantiate(ventData.SkeldVent() ? SkeldVentPrefab : PolusVentPrefab, room.transform);
-            vent.transform.position = ventObject.transform.position;
-            vent.name = ventData.Name;
-            vent.Id = allVents.Count + 1;
-            vent.gameObject.SetActive(true);
-
-            if (allVents.Count != 0)
+            try
             {
-                allVents.Last().Right = vent;
-                vent.Left = allVents.Last();
+                var ship = ShipStatus.Instance;
+                var allVents = ship.AllVents.ToList();
+
+                var ventObject = room.FindChild(ventData.ObjectName).gameObject;
+
+                var vent = Object.Instantiate(ventData.SkeldVent() ? SkeldVentPrefab : PolusVentPrefab, room.transform);
+                vent.transform.position = ventObject.transform.position;
+                vent.name = ventData.Name;
+                vent.Id = allVents.Count + 1;
+                vent.gameObject.SetActive(true);
+
+                if (allVents.Count != 0)
+                {
+                    allVents.Last().Right = vent;
+                    vent.Left = allVents.Last();
+                }
+
+                ventObject.Destroy();
+
+                ship.AllVents = ship.AllVents.Add(vent);
             }
-
-            ventObject.Destroy();
-
-            ship.AllVents = ship.AllVents.Add(vent);
+            catch (Exception e)
+            {
+                Logger<ApolloPlugin>.Error(
+                    $"Failed to create vent {ventData.Name} in room {room.gameObject.name}:\n" +
+                    e);
+            }
         }
 
         public static void CreateCam(Transform room, CamData camData)
         {
-            var ship = ShipStatus.Instance;
-            var camObject = room.FindChild(camData.ObjectName).gameObject;
+            try
+            {
+                var ship = ShipStatus.Instance;
+                var camObject = room.FindChild(camData.ObjectName).gameObject;
 
-            var camera = Object.Instantiate(camData.SkeldCam() ? SkeldCamPrefab : PolusCamPrefab, room.transform);
-            camera.transform.position = camObject.transform.position;
-            camera.name = camData.Name;
-            camera.CamName = camData.Name;
-            camera.GetComponent<SpriteRenderer>().flipX = camData.Flip;
-            camera.Offset = camData.Offset;
-            camera.gameObject.SetActive(true);
+                var camera = Object.Instantiate(camData.SkeldCam() ? SkeldCamPrefab : PolusCamPrefab, room.transform);
+                camera.transform.position = camObject.transform.position;
+                camera.name = camData.Name;
+                camera.CamName = camData.Name;
+                camera.GetComponent<SpriteRenderer>().flipX = camData.Flip;
+                camera.Offset = camData.Offset;
+                camera.gameObject.SetActive(true);
 
-            camObject.Destroy();
+                camObject.Destroy();
 
-            ship.AllCameras = ship.AllCameras.Add(camera);
+                ship.AllCameras = ship.AllCameras.Add(camera);
+            }
+            catch (Exception e)
+            {
+                Logger<ApolloPlugin>.Error(
+                    $"Failed to create cam {camData.Name} in room {room.gameObject.name}:\n" +
+                    e);
+            }
         }
 
         public static void CreateLadder(Transform room, LadderData ladderData)
         {
-            var ladderObject = room.FindChild(ladderData.ObjectName).gameObject;
-            var ladderObjectPos = ladderObject.transform.position;
-            var ladderParent =
-                Object.Instantiate(ladderData.Short ? ShortLadderPrefab : LongLadderPrefab, room.transform);
-            var ladderTop = ladderParent.GetComponentsInChildren<Ladder>()
-                .FirstOrDefault(ladder => ladder.IsTop);
-            var ladderBottom = ladderParent.GetComponentsInChildren<Ladder>()
-                .FirstOrDefault(ladder => !ladder.IsTop);
+            try
+            {
+                var ladderObject = room.FindChild(ladderData.ObjectName).gameObject;
+                var ladderObjectPos = ladderObject.transform.position;
+                var ladderParent =
+                    Object.Instantiate(ladderData.Short ? ShortLadderPrefab : LongLadderPrefab, room.transform);
+                var ladderTop = ladderParent.GetComponentsInChildren<Ladder>()
+                    .FirstOrDefault(ladder => ladder.IsTop);
+                var ladderBottom = ladderParent.GetComponentsInChildren<Ladder>()
+                    .FirstOrDefault(ladder => !ladder.IsTop);
 
-            ladderParent.name = ladderData.Name;
-            ladderParent.gameObject.SetActive(true);
+                ladderParent.name = ladderData.Name;
+                ladderParent.gameObject.SetActive(true);
 
-            ladderTop.name = "LadderTop";
-            ladderTop.Destination = ladderBottom;
-            ladderTop.Id = CurrentLadderId;
-            CurrentLadderId += 1;
-            AllLadders.Add(ladderTop);
+                ladderTop.name = "LadderTop";
+                ladderTop.Destination = ladderBottom;
+                ladderTop.Id = CurrentLadderId;
+                CurrentLadderId += 1;
+                AllLadders.Add(ladderTop);
 
-            ladderBottom.name = "LadderBottom";
-            ladderBottom.Destination = ladderTop;
-            ladderBottom.Id = CurrentLadderId;
-            CurrentLadderId += 1;
-            AllLadders.Add(ladderBottom);
+                ladderBottom.name = "LadderBottom";
+                ladderBottom.Destination = ladderTop;
+                ladderBottom.Id = CurrentLadderId;
+                CurrentLadderId += 1;
+                AllLadders.Add(ladderBottom);
 
-            ladderParent.transform.position = ladderObjectPos;
+                ladderParent.transform.position = ladderObjectPos;
 
-            ladderObject.Destroy();
+                ladderObject.Destroy();
+            }
+            catch (Exception e)
+            {
+                Logger<ApolloPlugin>.Error(
+                    $"Failed to create ladder {ladderData.Name} in room {room.gameObject.name}:\n" +
+                    e);
+            }
         }
 
         public static void CreatePlatform(Transform room, PlatformData platformData)
         {
-            var left = room.FindChild(platformData.LeftUseObject);
-            var right = room.FindChild(platformData.RightUseObject);
+            try
+            {
+                var left = room.FindChild(platformData.LeftUseObject);
+                var right = room.FindChild(platformData.RightUseObject);
 
-            var platformParent = new GameObject(platformData.Name);
-            platformParent.transform.parent = room;
+                var platformParent = new GameObject(platformData.Name);
+                platformParent.transform.parent = room;
 
-            var platform = Object.Instantiate(PlatformPrefab, platformParent.transform);
-            platform.name = "Platform";
-            platform.transform.position = platformData.StartLeft ? left.position : right.position;
-            platform.LeftUsePosition = left.position;
-            platform.LeftPosition = left.position + new Vector3(1.5f, 0f);
-            platform.IsLeft = platformData.StartLeft;
-            platform.RightPosition = right.position - new Vector3(1.5f, 0f);
-            platform.RightUsePosition = right.position;
-            platform.gameObject.SetActive(true);
-            platform.transform.FindChild("Fan").gameObject.SetActive(platformData.ShowFan);
+                var platform = Object.Instantiate(PlatformPrefab, platformParent.transform);
+                platform.name = "Platform";
+                platform.transform.position = platformData.StartLeft ? left.position : right.position;
+                platform.LeftUsePosition = left.position;
+                platform.LeftPosition = left.position + new Vector3(1.5f, 0f);
+                platform.IsLeft = platformData.StartLeft;
+                platform.RightPosition = right.position - new Vector3(1.5f, 0f);
+                platform.RightUsePosition = right.position;
+                platform.gameObject.SetActive(true);
+                platform.transform.FindChild("Fan").gameObject.SetActive(platformData.ShowFan);
 
-            var console1 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
-            platform.name = "LeftConsole";
-            console1.transform.position = left.position;
-            console1.Image = platform.GetComponent<SpriteRenderer>();
-            console1.gameObject.SetActive(true);
+                var console1 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
+                console1.name = "LeftConsole";
+                console1.transform.position = left.position;
+                console1.Image = platform.GetComponent<SpriteRenderer>();
+                console1.gameObject.SetActive(true);
 
-            var console2 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
-            platform.name = "RightConsole";
-            console2.transform.position = right.position;
-            console2.Image = platform.GetComponent<SpriteRenderer>();
-            console2.gameObject.SetActive(true);
+                var console2 = Object.Instantiate(PlatformConsolePrefab, platformParent.transform);
+                console2.name = "RightConsole";
+                console2.transform.position = right.position;
+                console2.Image = platform.GetComponent<SpriteRenderer>();
+                console2.gameObject.SetActive(true);
 
-            console1.Platform = console2.Platform = platform;
+                console1.Platform = console2.Platform = platform;
 
-            MovingPlatformHandler.Platforms.Add(new MovingPlatformHandler.MovingPlatform(platform, console1, console2));
+                MovingPlatformHandler.Platforms.Add(
+                    new MovingPlatformHandler.MovingPlatform(platform, console1, console2));
 
-            left.gameObject.Destroy();
-            right.gameObject.Destroy();
+                left.gameObject.Destroy();
+                right.gameObject.Destroy();
+            }
+            catch (Exception e)
+            {
+                Logger<ApolloPlugin>.Error(
+                    $"Failed to create platform {platformData.Name} in room {room.gameObject.name}:\n" +
+                    e);
+            }
         }
 
         public static void CreateTask(Transform roomGround, PlainShipRoom room, TaskData taskData)
@@ -462,11 +518,28 @@ namespace Apollo
                 var task = Object.Instantiate(originalTaskPrefab, roomGround);
                 task.name = taskData.Name;
                 task.transform.position = taskObject.position;
+                task.transform.SetLocalZ(-0.001f);
 
                 var console = task.GetComponent<Console>();
                 console.ConsoleId = CurrentConsoleId;
                 CurrentConsoleId++;
                 console.Room = room.RoomId;
+
+                if (task.GetComponent<MedScannerBehaviour>() != null)
+                {
+                    if (ShipStatus.Instance.MedScanner == null)
+                    {
+                        ShipStatus.Instance.MedScanner = task.GetComponent<MedScannerBehaviour>();
+                    }
+                    else
+                    {
+                        task.Destroy();
+                        taskObject.gameObject.Destroy();
+                        Logger<ApolloPlugin>.Error(
+                            $"Failed to create task {taskData.Name} of type {taskData.Type} in room {roomGround.gameObject.name}: MedScanner already exists");
+                        return;
+                    }
+                }
                 
                 var rend = task.GetComponent<SpriteRenderer>();
                 rend.flipX = taskData.FlipX;
@@ -478,15 +551,30 @@ namespace Apollo
                     collider.isTrigger = true;
                 }
 
-                /*var commonTask = ShipStatus.Instance.CommonTasks.Where(task => task.name == type.ToString()).ToArray()[0];
-                if (commonTask != null)
-                    CommonTasks.Add(commonTask);
-                var longTask = ShipStatus.Instance.LongTasks.Where(task => task.name == type.ToString()).ToArray()[0];
-                if (longTask != null)
-                    LongTasks.Add(longTask);
-                var normalPlayerTask = ShipStatus.Instance.NormalTasks.Where(task => task.name == type.ToString()).ToArray()[0];
-                if (normalPlayerTask != null)
-                    NormalTasks.Add(normalPlayerTask);*/
+                var tasks = AllCommonTasks.Where(task => task.name == type.ToString()).ToArray();
+                if (tasks.Length != 0)
+                {
+                    Logger<ApolloPlugin>.Info("Common");
+                    var playerTask = tasks[0];
+                    playerTask.StartAt = room.RoomId;
+                    CommonTasks.Add(playerTask);
+                }
+                tasks = AllLongTasks.Where(task => task.name == type.ToString()).ToArray();
+                if (tasks.Length != 0)
+                {
+                    Logger<ApolloPlugin>.Info("Long");
+                    var playerTask = tasks[0];
+                    playerTask.StartAt = room.RoomId;
+                    LongTasks.Add(playerTask);
+                }
+                tasks = AllNormalTasks.Where(task => task.name == type.ToString()).ToArray();
+                if (tasks.Length != 0)
+                {
+                    Logger<ApolloPlugin>.Info("Normal");
+                    var playerTask = tasks[0];
+                    playerTask.StartAt = room.RoomId;
+                    NormalTasks.Add(playerTask);
+                }
 
                 task.SetActive(true);
                 taskObject.gameObject.Destroy();
@@ -500,6 +588,22 @@ namespace Apollo
         }
 
         public static IEnumerator Reset()
+        {
+            foreach (var ladder in AllLadders)
+            {
+                ladder.Destroy();
+            }
+            AllLadders = new List<Ladder>();
+            CurrentLadderId = 0;
+            
+            CurrentConsoleId = 0;
+            CommonTasks = new List<NormalPlayerTask>();
+            LongTasks = new List<NormalPlayerTask>();
+            NormalTasks = new List<NormalPlayerTask>();
+            yield break;
+        }
+        
+        public static IEnumerator DestroyPrefabs()
         {
             foreach (var pair in SimpleObjectPrefabs)
             {
@@ -524,22 +628,11 @@ namespace Apollo
             PlatformConsolePrefab.gameObject.Destroy();
             PlatformConsolePrefab = null;
             
-            foreach (var ladder in AllLadders)
-            {
-                ladder.Destroy();
-            }
-            AllLadders = new List<Ladder>();
-            CurrentLadderId = 0;
-            
             foreach (var pair in TaskPrefabs)
             {
                 pair.Value.Destroy();
             }
             TaskPrefabs = new Dictionary<TaskObjects.TaskType, GameObject>();
-            CurrentConsoleId = 0;
-            CommonTasks = new List<NormalPlayerTask>();
-            LongTasks = new List<NormalPlayerTask>();
-            NormalTasks = new List<NormalPlayerTask>();
             yield break;
         }
     }

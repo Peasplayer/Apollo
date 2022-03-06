@@ -41,6 +41,7 @@ namespace Apollo
             shipStatus.SpecialTasks = new List<PlayerTask>().ToArray();
             shipStatus.FastRooms = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, PlainShipRoom>();
             shipStatus.SystemNames = new List<StringNames>().ToArray();
+            shipStatus.MedScanner = null;
             //shipStatus.Systems = new Il2CppSystem.Collections.Generic.Dictionary<SystemTypes, ISystemType>();
             //shipStatus.Systems.Add(SystemTypes.Electrical, new SwitchSystem().Cast<ISystemType>());
             //shipStatus.Systems.Add(SystemTypes.Comms, new HudOverrideSystemType().Cast<ISystemType>());
