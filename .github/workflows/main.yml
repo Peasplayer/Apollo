@@ -23,5 +23,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: Peasmod.dll
-          path: Peasmod/bin/Release/netstandard2.1/Apollo.dll
+          name: Apollo.dll
+          path: Apollo/bin/Release/netstandard2.1/Apollo.dll
