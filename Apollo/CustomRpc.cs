@@ -27,7 +27,7 @@ namespace Apollo
         [MethodRpc((uint) RpcCalls.UseCustomMap)]
         public static void RpcUseCustomMap(PlayerControl sender, byte target, bool useCustomMap)
         {
-            if (!AmongUsClient.Instance.AmHost) 
+            if (AmongUsClient.Instance.AmHost) 
                 return;
                 
             if (target != PlayerControl.LocalPlayer.PlayerId && target != byte.MaxValue) 

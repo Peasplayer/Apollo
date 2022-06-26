@@ -24,8 +24,6 @@ namespace Apollo
         public static AssetBundle Bundle;
         public static GameObject TestObject;
 
-        public static bool UseCustomMap;
-
         public override void Load()
         {
             try

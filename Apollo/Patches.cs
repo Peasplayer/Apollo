@@ -299,6 +299,20 @@ namespace Apollo
             }
         }
 
+        [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
+        [HarmonyPostfix]
+        public static void SetCorrectMapIdPatch(LobbyBehaviour __instance)
+        {
+            if (PlayerControl.GameOptions.MapId == 5)
+            {
+                CustomMap.UseCustomMap = true;
+            }
+            if (CustomMap.UseCustomMap)
+            {
+                PlayerControl.GameOptions.MapId = 5;
+            }
+        }
+
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Increase))]
         [HarmonyPostfix]
         public static void KeyValueOptionIncreasePatch(KeyValueOption __instance)

@@ -349,6 +349,7 @@ namespace Apollo
                 Logger<ApolloPlugin>.Error(
                     $"Failed to create simple object {objectData.Name} of type {objectData.Type} in room {room.gameObject.name}:\n" +
                     e);
+                room.FindChild(objectData.ObjectName).gameObject.Destroy();
             }
         }
 
